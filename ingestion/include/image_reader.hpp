@@ -27,4 +27,12 @@ std::string detect_format(const std::vector<unsigned char>& bytes);
 // Never throws; failures are reported in ReadResult::error.
 ReadResult read_image_info(const std::filesystem::path& p);
 
+// Writes a normalized CHW float32 tensor. If channels are 1/3/4, OpenCV grayscale
+// values are replicated to RGB; output dimensions are always 3 x height x width.
+bool write_normalized_tensor(const std::filesystem::path& input,
+                             const std::filesystem::path& output,
+                             int width,
+                             int height,
+                             std::string& error);
+
 }  // namespace cnn::ingestion

@@ -30,6 +30,17 @@ std::optional<std::string> resolve_label(const fs::path& file, const fs::path& r
             if (!digits || rule.divisor <= 0) return std::nullopt;
             return std::to_string(std::stoi(stem) / rule.divisor);
         }
+
+        case LabelMode::PrefixStem: {
+            const std::string stem = to_utf8(file.stem());
+            const auto separator = stem.find('_');
+            if (separator == std::string::npos || separator == 0) return std::nullopt;
+            const std::string prefix = stem.substr(0, separator);
+            const bool numeric = std::all_of(
+                prefix.begin(), prefix.end(),
+                [](unsigned char c) { return std::isdigit(c) != 0; });
+            return numeric ? std::optional<std::string>(prefix) : std::nullopt;
+        }
     }
     return std::nullopt;
 }
@@ -54,6 +65,7 @@ nlohmann::json to_json(const ImageRecord& r) {
     j["channels"] = r.info.channels;
     j["format"] = r.info.format;
     j["file_size_bytes"] = r.info.file_size;
+    if (!r.tensor_path.empty()) j["tensor_path"] = r.tensor_path;
     return j;
 }
 

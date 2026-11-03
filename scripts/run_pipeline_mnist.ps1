@@ -54,7 +54,15 @@ if (-not $SkipNativeBuild) {
 }
 
 Write-Host "[3/4] Prepare MNIST data" -ForegroundColor Cyan
-Invoke-PythonCommand -ArgumentList @("scripts\prepare_datasets.py", "--experiment", "mnist")
+$tensorManifest = Join-Path $projectRoot "data\manifests\mnist.jsonl"
+$tensorDirectory = Join-Path $projectRoot "data\processed\mnist"
+Invoke-ProjectCommand -FilePath (Join-Path $projectRoot "build\ingestion\Release\cnn_ingest.exe") -ArgumentList @(
+    "--root", (Join-Path $projectRoot "data\raw\mnist\train"),
+    "--out", $tensorManifest,
+    "--label-mode", "filename-prefix",
+    "--export-tensors", $tensorDirectory,
+    "--image-size", "$ImageSize"
+)
 
 Write-Host "[4/4] Train MNIST CNN + sklearn MLP" -ForegroundColor Cyan
 Invoke-PythonCommand -ArgumentList @(

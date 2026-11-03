@@ -15,6 +15,10 @@ training:
   mixed_precision:
     enabled: false             # GTX 1050 Ti has no tensor cores; enable only if benchmarks show a gain
 
+  cudnn:
+    benchmark: true
+    deterministic: false
+
   dataloader:
     num_workers: 2
     pin_memory: true

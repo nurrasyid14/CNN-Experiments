@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "file_validator.hpp"
 #include "image_reader.hpp"
@@ -49,6 +50,8 @@ std::set<std::string> parse_list(const std::string& s) {
 
 int main(int argc, char** argv) {
     fs::path root, out = "manifest.jsonl", errors_path;
+    fs::path tensor_dir;
+    int image_size = 28;
     LabelRule rule;
     std::set<std::string> split_names = {"train", "validation", "test"};
 
@@ -67,11 +70,14 @@ int main(int argc, char** argv) {
         else if (key == "--errors") errors_path = from_utf8(value());
         else if (key == "--label-divisor") rule.divisor = std::atoi(value().c_str());
         else if (key == "--split-names") split_names = parse_list(value());
+        else if (key == "--export-tensors") tensor_dir = from_utf8(value());
+        else if (key == "--image-size") image_size = std::stoi(value());
         else if (key == "--label-mode") {
             const std::string m = value();
             if (m == "parent") rule.mode = LabelMode::Parent;
             else if (m == "numeric-stem") rule.mode = LabelMode::NumericStem;
             else if (m == "none") rule.mode = LabelMode::None;
+            else if (m == "filename-prefix") rule.mode = LabelMode::PrefixStem;
             else { std::cerr << "Unknown label mode: " << m << "\n"; return 2; }
         } else { std::cerr << "Unknown option: " << key << "\n"; print_usage(); return 2; }
     }
@@ -130,6 +136,21 @@ int main(int argc, char** argv) {
         rec.label = *label;
         rec.split = resolve_split(file, root, split_names);
         rec.info = *read.info;
+        if (!tensor_dir.empty()) {
+            std::hash<std::string> hasher;
+            const auto name_hash = hasher(to_utf8(file.filename()));
+            rec.tensor_path = to_utf8(tensor_dir / (std::to_string(name_hash) + ".bin"));
+            std::string tensor_error;
+            if (!write_normalized_tensor(file, from_utf8(rec.tensor_path), image_size, image_size, tensor_error)) {
+                log_error(file, "preprocess", tensor_error);
+                continue;
+            }
+        }
+        if (rec.split.empty() && !tensor_dir.empty()) {
+            std::hash<std::string> hasher;
+            const auto bucket = hasher(to_utf8(file.filename())) % 100;
+            rec.split = bucket < 70 ? "train" : bucket < 85 ? "validation" : "test";
+        }
 
         manifest << to_json(rec).dump(-1, ' ', false, nlohmann::json::error_handler_t::replace) << "\n";
         ++ingested;

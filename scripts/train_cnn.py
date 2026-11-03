@@ -42,6 +42,8 @@ def make_loader(
     batch_size: int,
     training: bool,
     image_size: int = 224,
+    num_workers: int = 0,
+    persistent_workers: bool = False,
 ) -> DataLoader:
     dataset = ManifestDataset(
         records,
@@ -52,9 +54,16 @@ def make_loader(
         dataset,
         batch_size=batch_size,
         shuffle=training,
-        num_workers=0,
+        num_workers=num_workers,
+        persistent_workers=persistent_workers and num_workers > 0,
         pin_memory=torch.cuda.is_available(),
     )
+
+
+def configure_acceleration(training_config: dict) -> None:
+    cudnn_config = training_config.get("cudnn", {})
+    torch.backends.cudnn.benchmark = bool(cudnn_config.get("benchmark", False))
+    torch.backends.cudnn.deterministic = bool(cudnn_config.get("deterministic", False))
 
 
 def train_cnn(
@@ -172,6 +181,7 @@ def main() -> int:
     datasets = load_config(root / "configs/datasets.yaml")["datasets"]
     training_config = load_config(root / "configs/training.yaml")["training"]
     seed_everything(int(training_config["seed"]))
+    configure_acceleration(training_config)
 
     records = load_manifest(root / datasets[args.experiment]["manifest"])
     records, class_names, _ = encode_labels(records)
@@ -185,12 +195,17 @@ def main() -> int:
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     batch_size = args.batch_size
+    dataloader_config = training_config["dataloader"]
+    loader_options = {
+        "num_workers": int(dataloader_config["num_workers"]),
+        "persistent_workers": bool(dataloader_config["persistent_workers"]),
+    }
     model = CNNFeatureExtractor(args.embedding_dim, len(class_names)).to(device)
     checkpoint_dir = root / "checkpoints" / "experiments" / args.experiment
     cnn_history = train_cnn(
         model,
-        make_loader(split_records["train"], batch_size, training=True, image_size=args.image_size),
-        make_loader(split_records["validation"], batch_size, training=False, image_size=args.image_size),
+        make_loader(split_records["train"], batch_size, training=True, image_size=args.image_size, **loader_options),
+        make_loader(split_records["validation"], batch_size, training=False, image_size=args.image_size, **loader_options),
         device,
         args.epochs,
         float(training_config["learning_rate"]),
@@ -206,12 +221,12 @@ def main() -> int:
 
     train_features, train_labels = extract_features(
         model,
-        make_loader(split_records["train"], batch_size, training=False, image_size=args.image_size),
+        make_loader(split_records["train"], batch_size, training=False, image_size=args.image_size, **loader_options),
         device,
     )
     test_features, test_labels = extract_features(
         model,
-        make_loader(split_records["test"], batch_size, training=False, image_size=args.image_size),
+        make_loader(split_records["test"], batch_size, training=False, image_size=args.image_size, **loader_options),
         device,
     )
 
