@@ -1,0 +1,2 @@
+.\scripts\run_pipeline_simplicity.ps1 -Epochs 20 -BatchSize 32
+.\scripts\run_pipeline_aerial.ps1 -Epochs 20 -BatchSize 32

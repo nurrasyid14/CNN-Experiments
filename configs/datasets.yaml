@@ -1,0 +1,47 @@
+datasets:
+  simplicity:
+    type: classification
+    raw_dir: data/raw/SIMPLIcity Dataset
+    manifest: data/manifests/simplicity.jsonl
+    labels: numeric-stem
+    label_divisor: 100
+    split_names: [train, validation, test]
+    preserve_splits: true
+
+  aerial:
+    type: segmentation_to_classification
+    raw_dir: data/raw/aerial_test/dataset/semantic_drone_dataset
+    class_csv: data/raw/aerial_test/class_dict_seg.csv
+    images_dir: original_images
+    masks_dir: label_images_semantic
+    manifest: data/manifests/aerial.jsonl
+    split:
+      train: 0.70
+      validation: 0.15
+      test: 0.15
+      seed: 42
+
+  animal:
+    type: classification
+    raw_dir: data/raw/animal_dataset
+    manifest: data/manifests/animal.jsonl
+    labels: numeric-range
+    range_size: 5
+    class_names: [parrot, butterfly, elephant, swan, tiger]
+    split:
+      train: 0.60
+      validation: 0.20
+      test: 0.20
+      seed: 42
+
+  mnist:
+    type: classification
+    raw_dir: data/raw/mnist/train
+    manifest: data/manifests/mnist.jsonl
+    filename_label: prefix
+    class_names: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    split:
+      train: 0.70
+      validation: 0.15
+      test: 0.15
+      seed: 42

@@ -1,0 +1,24 @@
+dataset:
+  # SIMPLIcity: 1000 images (0.jpg..999.jpg), 10 classes of 100. Class = file number // 100.
+  # Arrives pre-split into train/validation/test (50/30/20 images per class).
+  raw_dir: data/raw/SIMPLIcity Dataset
+  manifest: dataset/manifests/images.jsonl
+
+  ingestion:
+    label_mode: numeric-stem   # parent | numeric-stem | none
+    label_divisor: 100
+    split_names: [train, validation, test]
+
+  # Decision for Block 3: keep the predefined split (use_existing) or re-split 70/15/15.
+  split:
+    strategy: use_existing     # use_existing | stratified
+    train: 0.70
+    validation: 0.15
+    test: 0.15
+    seed: 42
+
+  processed_dir: data/processed
+  image:
+    height: 224
+    width: 224
+    channels: 3

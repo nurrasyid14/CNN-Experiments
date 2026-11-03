@@ -1,0 +1,5 @@
+experiment:
+  name: baseline
+  seed: 42
+  # Controls: identical splits, fixed seeds, recorded configs
+  record: [config, seed, split_ids, git_commit, package_versions, gpu_info]

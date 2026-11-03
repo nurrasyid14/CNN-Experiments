@@ -1,0 +1,11 @@
+{
+  "device": "cuda",
+  "validation": {
+    "accuracy": 0.0,
+    "classification_report": "              precision    recall  f1-score   support\n\n       grass       0.00      0.00      0.00       0.0\n  paved-area       0.00      0.00      0.00       1.0\n        roof       0.00      0.00      0.00       0.0\n\n    accuracy                           0.00       1.0\n   macro avg       0.00      0.00      0.00       1.0\nweighted avg       0.00      0.00      0.00       1.0\n"
+  },
+  "test": {
+    "accuracy": 0.5,
+    "classification_report": "              precision    recall  f1-score   support\n\n       grass       0.00      0.00      0.00         1\n  paved-area       0.67      1.00      0.80         2\n        roof       0.00      0.00      0.00         1\n\n    accuracy                           0.50         4\n   macro avg       0.22      0.33      0.27         4\nweighted avg       0.33      0.50      0.40         4\n"
+  }
+}

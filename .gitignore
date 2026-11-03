@@ -1,0 +1,20 @@
+.venv/
+__pycache__/
+*.pyc
+build/
+.vs/
+.idea/
+.pytest_cache/
+*.egg-info/
+
+# data and artifacts (large / regenerable)
+data/raw/*
+data/interim/*
+data/processed/*
+checkpoints/*.pt
+checkpoints/experiments/*.pt
+logs/*
+reports/*
+runs/
+
+!**/.gitkeep

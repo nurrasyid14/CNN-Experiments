@@ -1,0 +1,25 @@
+model:
+  input_channels: 3
+  input_height: 224
+  input_width: 224
+  num_classes: auto            # resolved from class_mapping.json
+
+  convolution:
+    kernel_size: 3
+    stride: 1
+    padding: 1
+    dilation: 1
+
+  channels: [32, 64, 128]
+
+  activation:
+    name: relu
+
+  sampling:
+    enabled: true
+    method: baseline
+
+  pooling:
+    enabled: true
+    method: max
+    kernel_size: 2
