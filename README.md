@@ -67,8 +67,8 @@ Optional arguments:
 - `--batch-size`: PyTorch training and feature-extraction batch size.
 - `--epochs`: number of CNN training epochs.
 
-Results are written to `reports/<experiment>/metrics.json`; frozen CNN weights and class names
-are written to `reports/<experiment>/cnn_features.pt`.
+Results are written to `outputs/reports/<experiment>/metrics.json`; frozen CNN weights and class names
+are written to `outputs/reports/<experiment>/cnn_features.pt`.
 
 ## Project structure
 
@@ -77,10 +77,12 @@ CNN-Classifier/
 ├── CMakeLists.txt
 ├── CMakePresets.json
 ├── vcpkg.json
-├── ingestion/                 # C++ image validation and metadata ingestion
-├── tests/ingestion/
-├── model/cnn.py               # PyTorch CNN feature extractor
-├── training/data.py           # Manifest dataset and image transforms
+├── src/
+│   ├── convolution/           # CNN models and architecture definitions
+│   ├── learning/              # Training evaluation and reporting
+│   ├── preprocessing/         # C++ and Python ingestion/data loading
+│   ├── pipeline/              # Training pipeline entry points
+│   └── utils/                 # Metrics counters and visualisation helpers
 ├── scripts/
 │   ├── prepare_datasets.py    # Create both dataset manifests
 │   ├── train_cnn.py           # CNN training + sklearn MLP classification
@@ -91,8 +93,9 @@ CNN-Classifier/
 │   └── training.yaml
 ├── data/raw/
 ├── data/manifests/
-├── checkpoints/
-└── reports/
+└── outputs/
+    ├── checkpoints/
+    └── reports/
 ```
 
 ## Model behavior
@@ -165,7 +168,7 @@ scripts\ingest_simplicity.bat
 
 ## Checkpoints
 
-Each experiment stores PyTorch checkpoints in `checkpoints/experiments/<experiment>/`:
+Each experiment stores PyTorch checkpoints in `outputs/checkpoints/experiments/<experiment>/`:
 
 - `best_model.pt`: best CNN according to validation accuracy.
 - `latest_model.pt`: final CNN epoch and optimizer state.

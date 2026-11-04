@@ -16,6 +16,7 @@ from sklearn.metrics import (
     confusion_matrix,
     roc_auc_score,
 )
+from utils.visualisation import plot_training_curves
 
 
 def analyze_experiment(
@@ -80,22 +81,7 @@ def analyze_experiment(
         plt.savefig(figures_dir / "gradient_norms.png", dpi=160)
         plt.close()
 
-    epochs = [row["epoch"] for row in cnn_history]
-    losses = [row["loss"] for row in cnn_history]
-    accuracies = [row["accuracy"] for row in cnn_history]
-    validation_accuracies = [row["validation_accuracy"] for row in cnn_history]
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
-    axes[0].plot(epochs, losses, marker="o")
-    axes[0].set(title="CNN training loss", xlabel="Epoch", ylabel="Loss")
-    axes[0].grid(alpha=0.3)
-    axes[1].plot(epochs, accuracies, marker="o", label="training")
-    axes[1].plot(epochs, validation_accuracies, marker="o", label="validation")
-    axes[1].set(title="CNN accuracy", xlabel="Epoch", ylabel="Accuracy")
-    axes[1].legend()
-    axes[1].grid(alpha=0.3)
-    plt.tight_layout()
-    plt.savefig(figures_dir / "training_curves.png", dpi=160)
-    plt.close(fig)
+    plot_training_curves(figures_dir / "training_curves.png", cnn_history)
 
     summary = {
         "experiment": experiment,

@@ -71,5 +71,5 @@ Write-Host "[5/5] Analyze Animal results" -ForegroundColor Cyan
 Invoke-PythonCommand -ArgumentList @("scripts\analyze_results.py", "--experiment", "animal")
 
 Write-Host "Animal pipeline complete." -ForegroundColor Green
-Write-Host "Checkpoints: $projectRoot\checkpoints\experiments\animal"
-Write-Host "Reports:     $projectRoot\reports\animal"
+Write-Host "Checkpoints: $projectRoot\outputs\checkpoints\experiments\animal"
+Write-Host "Reports:     $projectRoot\outputs\reports\animal"

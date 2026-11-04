@@ -71,5 +71,5 @@ Write-Host "[5/5] Analyze Aerial results" -ForegroundColor Cyan
 Invoke-PythonCommand -ArgumentList @("scripts\analyze_results.py", "--experiment", "aerial")
 
 Write-Host "Aerial pipeline complete." -ForegroundColor Green
-Write-Host "Checkpoints: $projectRoot\checkpoints\experiments\aerial"
-Write-Host "Reports:     $projectRoot\reports\aerial"
+Write-Host "Checkpoints: $projectRoot\outputs\checkpoints\experiments\aerial"
+Write-Host "Reports:     $projectRoot\outputs\reports\aerial"

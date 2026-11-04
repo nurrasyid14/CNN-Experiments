@@ -26,6 +26,6 @@ echo [5/5] Train Aerial
 %PYTHON% scripts\analyze_results.py --experiment aerial || exit /b %errorlevel%
 
 echo Pipeline complete.
-echo Checkpoints: checkpoints\experiments\
-echo Reports:     reports\
+echo Checkpoints: outputs\checkpoints\experiments\
+echo Reports:     outputs\reports\
 endlocal

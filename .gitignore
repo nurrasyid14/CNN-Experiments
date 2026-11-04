@@ -11,10 +11,10 @@ build/
 data/raw/*
 data/interim/*
 data/processed/*
-checkpoints/*.pt
-checkpoints/experiments/*.pt
+outputs/checkpoints/*.pt
+outputs/checkpoints/experiments/*.pt
 logs/*
-reports/*
+outputs/reports/*
 runs/
 
 !**/.gitkeep

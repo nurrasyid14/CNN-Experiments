@@ -5,8 +5,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+SRC_ROOT = ROOT / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
 
 from learning.evaluation.evaluator import analyze_experiment
 
@@ -19,7 +20,7 @@ def main() -> int:
     root = ROOT
     print(
         "Existing report analysis is refreshed automatically after training. "
-        f"See {root / 'reports' / args.experiment / 'analysis.json'}"
+        f"See {root / 'outputs' / 'reports' / args.experiment / 'analysis.json'}"
     )
     return 0
 

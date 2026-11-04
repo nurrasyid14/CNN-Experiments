@@ -71,5 +71,5 @@ Write-Host "[5/5] Analyze SIMPLIcity results" -ForegroundColor Cyan
 Invoke-PythonCommand -ArgumentList @("scripts\analyze_results.py", "--experiment", "simplicity")
 
 Write-Host "SIMPLIcity pipeline complete." -ForegroundColor Green
-Write-Host "Checkpoints: $projectRoot\checkpoints\experiments\simplicity"
-Write-Host "Reports:     $projectRoot\reports\simplicity"
+Write-Host "Checkpoints: $projectRoot\outputs\checkpoints\experiments\simplicity"
+Write-Host "Reports:     $projectRoot\outputs\reports\simplicity"

@@ -78,5 +78,5 @@ Write-Host "[5/5] Analyze MNIST results" -ForegroundColor Cyan
 Invoke-PythonCommand -ArgumentList @("scripts\analyze_results.py", "--experiment", "mnist")
 
 Write-Host "MNIST pipeline complete." -ForegroundColor Green
-Write-Host "Checkpoints: $projectRoot\checkpoints\experiments\mnist"
-Write-Host "Reports:     $projectRoot\reports\mnist"
+Write-Host "Checkpoints: $projectRoot\outputs\checkpoints\experiments\mnist"
+Write-Host "Reports:     $projectRoot\outputs\reports\mnist"

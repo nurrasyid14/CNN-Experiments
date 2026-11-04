@@ -9,8 +9,8 @@ import torch
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_CHECKPOINT_DIR = ROOT / "checkpoints" / "experiments"
-DEFAULT_OUTPUT_DIR = ROOT / "checkpoints" / "best_parameters"
+DEFAULT_CHECKPOINT_DIR = ROOT / "outputs" / "checkpoints" / "experiments"
+DEFAULT_OUTPUT_DIR = ROOT / "outputs" / "checkpoints" / "best_parameters"
 
 
 def encode_tensor(tensor: torch.Tensor) -> dict[str, Any]:

@@ -24,7 +24,8 @@ dependencies = [
 dev = ["pytest"]
 
 [tool.setuptools.packages.find]
-include = ["preprocessing*", "convolution*", "learning*", "pipeline*"]
+where = ["src"]
+include = ["preprocessing*", "convolution*", "learning*", "pipeline*", "utils*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

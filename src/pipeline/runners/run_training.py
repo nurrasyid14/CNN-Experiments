@@ -15,9 +15,10 @@ from sklearn.neural_network import MLPClassifier
 from torch import nn
 from torch.utils.data import DataLoader
 
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+ROOT = Path(__file__).resolve().parents[3]
+SRC_ROOT = ROOT / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
 
 from convolution.models.cnn.classifier import CNNFeatureExtractor
 from learning.evaluation.evaluator import analyze_experiment
@@ -201,7 +202,7 @@ def main() -> int:
         "persistent_workers": bool(dataloader_config["persistent_workers"]),
     }
     model = CNNFeatureExtractor(args.embedding_dim, len(class_names)).to(device)
-    checkpoint_dir = root / "checkpoints" / "experiments" / args.experiment
+    checkpoint_dir = root / "outputs" / "checkpoints" / "experiments" / args.experiment
     cnn_history = train_cnn(
         model,
         make_loader(split_records["train"], batch_size, training=True, image_size=args.image_size, **loader_options),
@@ -266,7 +267,7 @@ def main() -> int:
         "cnn_embedding_dimensions": args.embedding_dim,
         "classification_report": report,
     }
-    output_dir = root / "reports" / args.experiment
+    output_dir = root / "outputs" / "reports" / args.experiment
     output_dir.mkdir(parents=True, exist_ok=True)
     with (output_dir / "metrics.json").open("w", encoding="utf-8") as target:
         json.dump(metrics, target, indent=2)
