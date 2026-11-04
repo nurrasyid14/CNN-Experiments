@@ -1,0 +1,1 @@
+"""Convolution model implementations."""

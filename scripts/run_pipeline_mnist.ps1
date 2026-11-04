@@ -56,7 +56,7 @@ if (-not $SkipNativeBuild) {
 Write-Host "[3/4] Prepare MNIST data" -ForegroundColor Cyan
 $tensorManifest = Join-Path $projectRoot "data\manifests\mnist.jsonl"
 $tensorDirectory = Join-Path $projectRoot "data\processed\mnist"
-Invoke-ProjectCommand -FilePath (Join-Path $projectRoot "build\ingestion\Release\cnn_ingest.exe") -ArgumentList @(
+Invoke-ProjectCommand -FilePath (Join-Path $projectRoot "build\preprocessing\Release\cnn_ingest.exe") -ArgumentList @(
     "--root", (Join-Path $projectRoot "data\raw\mnist\train"),
     "--out", $tensorManifest,
     "--label-mode", "filename-prefix",

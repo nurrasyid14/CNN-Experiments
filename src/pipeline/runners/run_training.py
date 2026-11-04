@@ -19,9 +19,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from model.cnn import CNNFeatureExtractor
-from training.data import ManifestDataset, encode_labels, load_manifest
-from analysis.report import analyze_experiment
+from convolution.models.cnn.classifier import CNNFeatureExtractor
+from learning.evaluation.evaluator import analyze_experiment
+from preprocessing.python.dataloader import ManifestDataset, encode_labels, load_manifest
 
 
 def seed_everything(seed: int) -> None:

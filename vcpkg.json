@@ -1,13 +1,11 @@
 {
-  "name": "cnn-classifier",
-  "version": "0.1.0",
+  "name": "cnn-preprocessing",
+  "version-string": "1.0.0",
   "dependencies": [
-    {
-      "name": "opencv4",
-      "default-features": false,
-      "features": ["jpeg", "png", "tiff", "webp"]
-    },
+    "fmt",
+    "spdlog",
+    "yaml-cpp",
     "nlohmann-json",
-    "gtest"
+    "benchmark"
   ]
 }

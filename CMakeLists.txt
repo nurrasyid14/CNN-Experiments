@@ -20,7 +20,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 add_executable(env_check scripts/env_check.cpp)
 
 # Block 1
-add_subdirectory(ingestion)
+add_subdirectory(preprocessing)
 
 # Enabled as each block is implemented:
 # add_subdirectory(processing)   # Block 2
@@ -28,5 +28,5 @@ add_subdirectory(ingestion)
 
 if(CNN_BUILD_TESTS)
   enable_testing()
-  add_subdirectory(tests/ingestion)
+  add_subdirectory(preprocessing/tests/ingestion)
 endif()
