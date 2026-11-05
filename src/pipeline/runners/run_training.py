@@ -4,6 +4,7 @@ import argparse
 import json
 import random
 import sys
+from time import perf_counter
 from pathlib import Path
 
 import numpy as np
@@ -23,6 +24,15 @@ if str(SRC_ROOT) not in sys.path:
 from convolution.models.cnn.classifier import CNNFeatureExtractor
 from learning.evaluation.evaluator import analyze_experiment
 from preprocessing.python.dataloader import ManifestDataset, encode_labels, load_manifest
+from utils.metrics import (
+    benchmark_inference,
+    compare_model_execution,
+    classification_metrics,
+    count_model_parameters,
+    estimate_model_flops,
+    peak_gpu_memory_mib,
+    reset_peak_gpu_memory,
+)
 
 
 def seed_everything(seed: int) -> None:
@@ -78,11 +88,13 @@ def train_cnn(
     experiment: str,
 ) -> list[dict]:
     model.train()
+    reset_peak_gpu_memory(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
     criterion = nn.CrossEntropyLoss()
     best_accuracy = -1.0
     history = []
     for epoch in range(epochs):
+        epoch_started = perf_counter()
         total_loss = 0.0
         correct = 0
         total = 0
@@ -129,6 +141,7 @@ def train_cnn(
                 validation_correct += (predictions == labels).sum().item()
                 validation_total += labels.size(0)
         validation_accuracy = validation_correct / max(validation_total, 1)
+        epoch_elapsed = perf_counter() - epoch_started
         model.train()
         print(f"validation accuracy={validation_accuracy:.4f}")
         history.append({
@@ -137,6 +150,7 @@ def train_cnn(
             "accuracy": float(correct / max(total, 1)),
             "validation_accuracy": float(validation_accuracy),
             "gradient_norm": float(np.mean(gradient_norms)) if gradient_norms else 0.0,
+            "training_images_per_second": float(total / max(epoch_elapsed, 1e-9)),
         })
         if validation_accuracy >= best_accuracy:
             best_accuracy = validation_accuracy
@@ -266,6 +280,38 @@ def main() -> int:
         "device": str(device),
         "cnn_embedding_dimensions": args.embedding_dim,
         "classification_report": report,
+        "classification_metrics": classification_metrics(
+            test_labels,
+            predictions,
+            class_names,
+        ),
+        "model": {
+            "parameters": count_model_parameters(model),
+            "flops_per_inference": estimate_model_flops(
+                model,
+                torch.zeros(1, 3, args.image_size, args.image_size, device=device),
+            ),
+            "peak_vram_mib": peak_gpu_memory_mib(device),
+            "inference": benchmark_inference(
+                model,
+                torch.zeros(1, 3, args.image_size, args.image_size, device=device),
+            ),
+            "execution_device": str(device),
+            "execution_comparison": compare_model_execution(
+                model,
+                (1, 3, args.image_size, args.image_size),
+            ),
+        },
+        "training": {
+            "epochs": [
+                {
+                    "epoch": entry["epoch"],
+                    "images_per_second": entry["training_images_per_second"],
+                }
+                for entry in cnn_history
+            ],
+            "peak_vram_mib": peak_gpu_memory_mib(device),
+        },
     }
     output_dir = root / "outputs" / "reports" / args.experiment
     output_dir.mkdir(parents=True, exist_ok=True)
