@@ -1,5 +1,19 @@
-image:
+version: 1
+backend: cpu
+input:
   size: [224, 224]
+output:
+  size: [224, 224]
+  color_format: RGB
+  interpolation: area
 normalization:
+  method: standard
   mean: [0.485, 0.456, 0.406]
   std: [0.229, 0.224, 0.225]
+tensor:
+  batch_size: 32
+  dtype: float32
+  layout: CHW
+  memory_order: planar
+export:
+  format: binary

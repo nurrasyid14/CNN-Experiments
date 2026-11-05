@@ -2,9 +2,7 @@ import json
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
 from torch.utils.data import Dataset
-from torchvision import transforms
 
 
 def load_manifest(path: Path) -> list[dict]:
@@ -30,21 +28,11 @@ class ManifestDataset(Dataset):
         records: list[dict],
         image_size: tuple[int, int] = (224, 224),
         training: bool = False,
+        allow_raw_fallback: bool = False,
     ) -> None:
         self.records = records
-        augmentation = [
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(10),
-        ] if training else []
-        self.transform = transforms.Compose([
-            *augmentation,
-            transforms.Resize(image_size),
-            transforms.ToTensor(),
-            transforms.Normalize(
-                mean=(0.485, 0.456, 0.406),
-                std=(0.229, 0.224, 0.225),
-            ),
-        ])
+        self.image_size = image_size
+        self.allow_raw_fallback = allow_raw_fallback
 
     def __len__(self) -> int:
         return len(self.records)
@@ -60,8 +48,16 @@ class ManifestDataset(Dataset):
             if magic != b"CNNTNS1\0":
                 raise ValueError(f"Invalid tensor file: {tensor_path}")
             channels, height, width = (int(value) for value in dimensions)
+            if (channels, height, width) != (
+                3, self.image_size[0], self.image_size[1]
+            ):
+                raise ValueError(
+                    f"Unexpected tensor shape {(channels, height, width)} "
+                    f"for {tensor_path}; expected 3 x {self.image_size[0]} "
+                    f"x {self.image_size[1]}"
+                )
             tensor = values.reshape(channels, height, width).copy()
             return tensor.astype(np.float32, copy=False), int(record["label_index"])
-        with Image.open(record["path"]) as image:
-            image = image.convert("RGB")
-        return self.transform(image), int(record["label_index"])
+        raise ValueError(
+            f"Record has no C++ tensor_path: {record.get('path', '<unknown>')}"
+        )

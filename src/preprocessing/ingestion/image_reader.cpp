@@ -8,6 +8,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "tensor_builder.hpp"
+
 namespace fs = std::filesystem;
 
 namespace cnn::ingestion {
@@ -69,54 +71,11 @@ ReadResult read_image_info(const fs::path& p) {
 
 bool write_normalized_tensor(const fs::path& input, const fs::path& output,
                              int width, int height, std::string& error) {
-    std::ifstream in(input, std::ios::binary);
-    if (!in) {
-        error = "cannot open file";
-        return false;
-    }
-    std::vector<unsigned char> bytes((std::istreambuf_iterator<char>(in)),
-                                     std::istreambuf_iterator<char>());
-    cv::Mat image;
+    cnn::preprocessing::TensorSpec spec;
+    spec.width = width;
+    spec.height = height;
     try {
-        image = cv::imdecode(bytes, cv::IMREAD_UNCHANGED);
-        if (image.empty()) {
-            error = "decode failed: corrupted or unsupported image data";
-            return false;
-        }
-        if (image.rows != height || image.cols != width) {
-            cv::resize(image, image, cv::Size(width, height), 0, 0, cv::INTER_AREA);
-        }
-        if (image.channels() == 1) cv::cvtColor(image, image, cv::COLOR_GRAY2RGB);
-        else if (image.channels() == 4) cv::cvtColor(image, image, cv::COLOR_BGRA2RGB);
-        else if (image.channels() == 3) cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
-        else {
-            error = "unsupported channel count";
-            return false;
-        }
-        image.convertTo(image, CV_32FC3, 1.0 / 255.0);
-        if (output.has_parent_path()) std::filesystem::create_directories(output.parent_path());
-        std::ofstream out(output, std::ios::binary | std::ios::trunc);
-        if (!out) {
-            error = "cannot open tensor output";
-            return false;
-        }
-        const char magic[8] = {'C', 'N', 'N', 'T', 'N', 'S', '1', '\0'};
-        const std::uint32_t dims[3] = {3, static_cast<std::uint32_t>(height),
-                                       static_cast<std::uint32_t>(width)};
-        out.write(magic, sizeof(magic));
-        out.write(reinterpret_cast<const char*>(dims), sizeof(dims));
-        static const float mean[3] = {0.485f, 0.456f, 0.406f};
-        static const float stddev[3] = {0.229f, 0.224f, 0.225f};
-        for (int channel = 0; channel < 3; ++channel) {
-            for (int row = 0; row < image.rows; ++row) {
-                const cv::Vec3f* pixels = image.ptr<cv::Vec3f>(row);
-                for (int column = 0; column < image.cols; ++column) {
-                    const float value = (pixels[column][channel] - mean[channel]) / stddev[channel];
-                    out.write(reinterpret_cast<const char*>(&value), sizeof(value));
-                }
-            }
-        }
-        return static_cast<bool>(out);
+        return cnn::preprocessing::write_normalized_tensor(input, output, spec, error);
     } catch (const cv::Exception& exception) {
         error = exception.what();
         return false;
