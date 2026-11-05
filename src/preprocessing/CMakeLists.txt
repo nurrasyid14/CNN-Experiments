@@ -3,7 +3,7 @@ add_library(cnn_ingestion STATIC
   ingestion/image_reader.cpp
   ingestion/metadata_reader.cpp)
 target_include_directories(cnn_ingestion
-  PUBLIC include
+  PUBLIC include include/ingestion
   PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(cnn_ingestion
   PUBLIC nlohmann_json::nlohmann_json

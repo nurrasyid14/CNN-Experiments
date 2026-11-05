@@ -6,6 +6,8 @@
     "spdlog",
     "yaml-cpp",
     "nlohmann-json",
+    "opencv4",
+    "gtest",
     "benchmark"
   ]
 }

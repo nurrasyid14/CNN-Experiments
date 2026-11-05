@@ -1,20 +1,39 @@
 .venv/
 __pycache__/
 *.pyc
+*.pyo
 build/
+cmake-build-*/
+CMakeUserPresets.json
 .vs/
+.vscode/
 .idea/
 .pytest_cache/
 *.egg-info/
+.cache/
+.coverage
+htmlcov/
+coverage.xml
+*.exe
+*.dll
+*.pdb
+*.ilk
+
+# C++ dependencies and build products
+vcpkg_installed/
 
 # data and artifacts (large / regenerable)
 data/raw/*
 data/interim/*
 data/processed/*
+outputs/**/*
 outputs/checkpoints/*.pt
 outputs/checkpoints/experiments/*.pt
 logs/*
 outputs/reports/*
 runs/
+*.pt
+*.pth
+*.onnx
 
 !**/.gitkeep
