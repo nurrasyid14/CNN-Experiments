@@ -4,15 +4,14 @@ import argparse
 import json
 import random
 import sys
+from datetime import datetime
 from time import perf_counter
 from pathlib import Path
 
 import numpy as np
 import torch
 import yaml
-import joblib
 from sklearn.metrics import accuracy_score, classification_report
-from sklearn.neural_network import MLPClassifier
 from torch import nn
 from torch.utils.data import DataLoader
 
@@ -22,7 +21,14 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from convolution.models.cnn.classifier import CNNFeatureExtractor
+from learning.checkpoints.manager import save_torch_artifact
 from learning.evaluation.evaluator import analyze_experiment
+from learning.models.lstm import CNNLSTMHead
+from learning.models.mlp import CNNMLPHead
+from learning.models.rnn import CNNRNNHead
+from learning.monitoring.logger import MonitoringLogger
+from learning.reports.writer import write_run_manifest
+from learning.training.head_trainer import predict_embedding_head, train_embedding_head
 from preprocessing.python.dataloader import ManifestDataset, encode_labels, load_manifest
 from utils.metrics import (
     benchmark_inference,
@@ -190,6 +196,7 @@ def main() -> int:
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--image-size", type=int, default=224)
     parser.add_argument("--embedding-dim", type=int, default=512)
+    parser.add_argument("--head", choices=["mlp", "lstm", "rnn"], default="mlp")
     args = parser.parse_args()
 
     root = ROOT
@@ -215,8 +222,10 @@ def main() -> int:
         "num_workers": int(dataloader_config["num_workers"]),
         "persistent_workers": bool(dataloader_config["persistent_workers"]),
     }
+    run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
     model = CNNFeatureExtractor(args.embedding_dim, len(class_names)).to(device)
-    checkpoint_dir = root / "outputs" / "checkpoints" / "experiments" / args.experiment
+    checkpoint_dir = root / "outputs" / "checkpoints" / args.experiment / run_id
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
     cnn_history = train_cnn(
         model,
         make_loader(split_records["train"], batch_size, training=True, image_size=args.image_size, **loader_options),
@@ -244,27 +253,49 @@ def main() -> int:
         make_loader(split_records["test"], batch_size, training=False, image_size=args.image_size, **loader_options),
         device,
     )
+    validation_features, validation_labels = extract_features(
+        model,
+        make_loader(split_records["validation"], batch_size, training=False, image_size=args.image_size, **loader_options),
+        device,
+    )
 
-    classifier = MLPClassifier(
-        hidden_layer_sizes=(256, 128),
-        max_iter=1000,
-        random_state=int(training_config["seed"]),
-    )
-    classifier.fit(train_features, train_labels)
-    predictions = classifier.predict(test_features)
-    probabilities = (
-        classifier.predict_proba(test_features)
-        if hasattr(classifier, "predict_proba")
-        else None
-    )
-    if probabilities is not None:
-        aligned_probabilities = np.zeros(
-            (probabilities.shape[0], len(class_names)),
-            dtype=float,
+    if args.head == "lstm":
+        sequence_length = 8 if args.embedding_dim % 8 == 0 else 1
+        classifier = CNNLSTMHead(
+            args.embedding_dim,
+            len(class_names),
+            sequence_length=sequence_length,
         )
-        for column, class_id in enumerate(classifier.classes_):
-            aligned_probabilities[:, int(class_id)] = probabilities[:, column]
-        probabilities = aligned_probabilities
+    elif args.head == "rnn":
+        sequence_length = 8 if args.embedding_dim % 8 == 0 else 1
+        classifier = CNNRNNHead(
+            args.embedding_dim,
+            len(class_names),
+            sequence_length=sequence_length,
+        )
+    else:
+        classifier = CNNMLPHead(args.embedding_dim, len(class_names))
+
+    head_history = train_embedding_head(
+        classifier,
+        train_features,
+        train_labels,
+        validation_features,
+        validation_labels,
+        device,
+        args.epochs,
+        float(training_config["learning_rate"]),
+        batch_size=batch_size,
+    )
+    monitoring_dir = root / "outputs" / "monitoring" / args.experiment / run_id
+    monitoring = MonitoringLogger(monitoring_dir)
+    for entry in head_history:
+        monitoring.log_epoch(entry)
+    predictions, probabilities = predict_embedding_head(
+        classifier,
+        test_features,
+        device,
+    )
 
     report = classification_report(
         test_labels,
@@ -313,7 +344,7 @@ def main() -> int:
             "peak_vram_mib": peak_gpu_memory_mib(device),
         },
     }
-    output_dir = root / "outputs" / "reports" / args.experiment
+    output_dir = root / "outputs" / "reports" / args.experiment / run_id
     output_dir.mkdir(parents=True, exist_ok=True)
     with (output_dir / "metrics.json").open("w", encoding="utf-8") as target:
         json.dump(metrics, target, indent=2)
@@ -325,7 +356,17 @@ def main() -> int:
         },
         output_dir / "cnn_features.pt",
     )
-    joblib.dump(classifier, checkpoint_dir / "sklearn_mlp.joblib")
+    save_torch_artifact(
+        checkpoint_dir,
+        f"best_{args.head}",
+        {
+            "model_state_dict": classifier.state_dict(),
+            "head": args.head,
+            "class_names": class_names,
+            "embedding_dim": args.embedding_dim,
+        },
+        {"experiment": args.experiment, "run_id": run_id, "head": args.head},
+    )
     analysis = analyze_experiment(
         output_dir,
         args.experiment,
@@ -339,6 +380,16 @@ def main() -> int:
     metrics["pr_auc"] = analysis["macro_pr_auc"]
     with (output_dir / "metrics.json").open("w", encoding="utf-8") as target:
         json.dump(metrics, target, indent=2)
+    write_run_manifest(
+        output_dir,
+        args.experiment,
+        run_id,
+        {
+            "head": args.head,
+            "metrics": metrics,
+            "monitoring_dir": str(monitoring_dir.relative_to(root)),
+        },
+    )
     print(report)
     print(f"test accuracy: {metrics['accuracy']:.4f}")
     print(f"results: {output_dir}")
