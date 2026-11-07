@@ -1,0 +1,2 @@
+"""ResNet-18 model package."""
+
