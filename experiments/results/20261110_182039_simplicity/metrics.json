@@ -1,0 +1,203 @@
+{
+  "experiment": "simplicity",
+  "run_id": "20261110_182039_simplicity",
+  "architecture": "repvgg-a0",
+  "accuracy": 0.64,
+  "classes": [
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9"
+  ],
+  "device": "cuda",
+  "cnn_embedding_dimensions": 512,
+  "classification_report": "              precision    recall  f1-score   support\n\n           0       0.56      0.45      0.50        20\n           1       0.40      0.50      0.44        20\n           2       0.38      0.55      0.45        20\n           3       0.81      0.85      0.83        20\n           4       0.87      1.00      0.93        20\n           5       0.69      0.45      0.55        20\n           6       0.92      0.55      0.69        20\n           7       0.79      0.95      0.86        20\n           8       0.45      0.45      0.45        20\n           9       0.76      0.65      0.70        20\n\n    accuracy                           0.64       200\n   macro avg       0.66      0.64      0.64       200\nweighted avg       0.66      0.64      0.64       200\n",
+  "classification_metrics": {
+    "accuracy": 0.64,
+    "per_class": {
+      "0": {
+        "precision": 0.5625,
+        "recall": 0.45,
+        "f1": 0.5,
+        "support": 20
+      },
+      "1": {
+        "precision": 0.4,
+        "recall": 0.5,
+        "f1": 0.4444444444444444,
+        "support": 20
+      },
+      "2": {
+        "precision": 0.3793103448275862,
+        "recall": 0.55,
+        "f1": 0.4489795918367347,
+        "support": 20
+      },
+      "3": {
+        "precision": 0.8095238095238095,
+        "recall": 0.85,
+        "f1": 0.8292682926829268,
+        "support": 20
+      },
+      "4": {
+        "precision": 0.8695652173913043,
+        "recall": 1.0,
+        "f1": 0.9302325581395349,
+        "support": 20
+      },
+      "5": {
+        "precision": 0.6923076923076923,
+        "recall": 0.45,
+        "f1": 0.5454545454545454,
+        "support": 20
+      },
+      "6": {
+        "precision": 0.9166666666666666,
+        "recall": 0.55,
+        "f1": 0.6875,
+        "support": 20
+      },
+      "7": {
+        "precision": 0.7916666666666666,
+        "recall": 0.95,
+        "f1": 0.8636363636363636,
+        "support": 20
+      },
+      "8": {
+        "precision": 0.45,
+        "recall": 0.45,
+        "f1": 0.45,
+        "support": 20
+      },
+      "9": {
+        "precision": 0.7647058823529411,
+        "recall": 0.65,
+        "f1": 0.7027027027027027,
+        "support": 20
+      }
+    },
+    "macro_precision": 0.6636246279736667,
+    "macro_recall": 0.64,
+    "macro_f1": 0.6402218498897253
+  },
+  "model": {
+    "architecture": "repvgg-a0",
+    "parameters": {
+      "total": 8488970,
+      "trainable": 8488970,
+      "non_trainable": 0
+    },
+    "flops_per_inference": 3027510784,
+    "peak_vram_mib": 3018.54443359375,
+    "inference": {
+      "warmup": 10.0,
+      "iterations": 100.0,
+      "mean_ms": 21.948542001191527,
+      "median_ms": 16.081699985079467,
+      "p95_ms": 41.435080009978265,
+      "samples_per_second": 45.56111289513958
+    },
+    "execution_device": "cuda",
+    "execution_comparison": {
+      "cpu": {
+        "warmup": 10.0,
+        "iterations": 100.0,
+        "mean_ms": 79.41256599733606,
+        "median_ms": 77.90989999193698,
+        "p95_ms": 104.84859502175823,
+        "samples_per_second": 12.592465530373941
+      },
+      "cuda": {
+        "warmup": 10.0,
+        "iterations": 100.0,
+        "mean_ms": 17.269668997032568,
+        "median_ms": 16.424400033429265,
+        "p95_ms": 24.543930008076124,
+        "samples_per_second": 57.90498938756899
+      }
+    }
+  },
+  "training": {
+    "epochs": [
+      {
+        "epoch": 1,
+        "images_per_second": 12.71069902958777,
+        "loss": 2.216749340057373,
+        "accuracy": 0.256,
+        "validation_accuracy": 0.44333333333333336
+      },
+      {
+        "epoch": 2,
+        "images_per_second": 104.68372137643024,
+        "loss": 1.5937102394104004,
+        "accuracy": 0.498,
+        "validation_accuracy": 0.49666666666666665
+      },
+      {
+        "epoch": 3,
+        "images_per_second": 101.39246736556322,
+        "loss": 1.4546457691192627,
+        "accuracy": 0.572,
+        "validation_accuracy": 0.61
+      },
+      {
+        "epoch": 4,
+        "images_per_second": 102.03148565004703,
+        "loss": 1.3273956155776978,
+        "accuracy": 0.64,
+        "validation_accuracy": 0.6633333333333333
+      },
+      {
+        "epoch": 5,
+        "images_per_second": 99.65977945297087,
+        "loss": 1.2050757217407226,
+        "accuracy": 0.694,
+        "validation_accuracy": 0.65
+      },
+      {
+        "epoch": 6,
+        "images_per_second": 98.83153062749092,
+        "loss": 1.1948142204284669,
+        "accuracy": 0.694,
+        "validation_accuracy": 0.6966666666666667
+      },
+      {
+        "epoch": 7,
+        "images_per_second": 96.96762832872193,
+        "loss": 1.0622739315032959,
+        "accuracy": 0.784,
+        "validation_accuracy": 0.7033333333333334
+      },
+      {
+        "epoch": 8,
+        "images_per_second": 98.84896508750461,
+        "loss": 1.0704728364944458,
+        "accuracy": 0.758,
+        "validation_accuracy": 0.7366666666666667
+      },
+      {
+        "epoch": 9,
+        "images_per_second": 94.06956666540955,
+        "loss": 0.95214932346344,
+        "accuracy": 0.832,
+        "validation_accuracy": 0.7866666666666666
+      },
+      {
+        "epoch": 10,
+        "images_per_second": 95.47202534171156,
+        "loss": 0.9235623092651367,
+        "accuracy": 0.848,
+        "validation_accuracy": 0.8
+      }
+    ],
+    "peak_vram_mib": 3018.54443359375
+  },
+  "roc_auc": 0.9354722222222221,
+  "pr_auc": 0.7222799971662787
+}

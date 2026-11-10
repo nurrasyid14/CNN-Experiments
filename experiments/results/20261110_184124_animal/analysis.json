@@ -1,0 +1,241 @@
+{
+  "experiment": "animal",
+  "roc_auc_by_class": {
+    "bird": 0.75,
+    "butterfly": 1.0,
+    "elephant": 0.75,
+    "swan": 1.0,
+    "tiger": 0.25
+  },
+  "pr_auc_by_class": {
+    "bird": 0.5,
+    "butterfly": 1.0,
+    "elephant": 0.5,
+    "swan": 1.0,
+    "tiger": 0.25
+  },
+  "macro_roc_auc": 0.75,
+  "macro_pr_auc": 0.65,
+  "cnn_history": [
+    {
+      "epoch": 1,
+      "loss": 1.6412335634231567,
+      "accuracy": 0.26666666666666666,
+      "validation_accuracy": 0.2,
+      "gradient_norm": 0.32860115349895375,
+      "training_images_per_second": 0.9056199532218243
+    },
+    {
+      "epoch": 2,
+      "loss": 2.176706075668335,
+      "accuracy": 0.2,
+      "validation_accuracy": 0.2,
+      "gradient_norm": 0.4250283986549167,
+      "training_images_per_second": 12.995417816490525
+    },
+    {
+      "epoch": 3,
+      "loss": 1.5757704973220825,
+      "accuracy": 0.4666666666666667,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.1692002535879831,
+      "training_images_per_second": 33.421566269189285
+    },
+    {
+      "epoch": 4,
+      "loss": 1.9166433811187744,
+      "accuracy": 0.4,
+      "validation_accuracy": 0.2,
+      "gradient_norm": 0.26150981436538345,
+      "training_images_per_second": 42.294779383574394
+    },
+    {
+      "epoch": 5,
+      "loss": 1.3870391845703125,
+      "accuracy": 0.4,
+      "validation_accuracy": 0.2,
+      "gradient_norm": 0.11555780552546768,
+      "training_images_per_second": 36.60122936565802
+    },
+    {
+      "epoch": 6,
+      "loss": 1.2271912097930908,
+      "accuracy": 0.6,
+      "validation_accuracy": 0.2,
+      "gradient_norm": 0.12797768659999265,
+      "training_images_per_second": 40.6296402449317
+    },
+    {
+      "epoch": 7,
+      "loss": 1.0338166952133179,
+      "accuracy": 0.8,
+      "validation_accuracy": 0.2,
+      "gradient_norm": 0.09575372392941704,
+      "training_images_per_second": 38.63117886271899
+    },
+    {
+      "epoch": 8,
+      "loss": 0.874233603477478,
+      "accuracy": 0.8,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.10642923426485676,
+      "training_images_per_second": 40.944653200176035
+    },
+    {
+      "epoch": 9,
+      "loss": 0.7728391885757446,
+      "accuracy": 0.9333333333333333,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.11802149336949429,
+      "training_images_per_second": 31.69744242058791
+    },
+    {
+      "epoch": 10,
+      "loss": 0.5874133706092834,
+      "accuracy": 1.0,
+      "validation_accuracy": 0.2,
+      "gradient_norm": 0.047963156146408226,
+      "training_images_per_second": 38.494890829558436
+    },
+    {
+      "epoch": 11,
+      "loss": 0.5328648090362549,
+      "accuracy": 1.0,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.04330002858426751,
+      "training_images_per_second": 19.545848305969134
+    },
+    {
+      "epoch": 12,
+      "loss": 0.5056491494178772,
+      "accuracy": 1.0,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.04557071112452404,
+      "training_images_per_second": 40.80278112505809
+    },
+    {
+      "epoch": 13,
+      "loss": 0.4832116663455963,
+      "accuracy": 1.0,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.03734197245417711,
+      "training_images_per_second": 35.58935859402544
+    },
+    {
+      "epoch": 14,
+      "loss": 0.4834277331829071,
+      "accuracy": 1.0,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.04271058298113263,
+      "training_images_per_second": 12.335128670557904
+    },
+    {
+      "epoch": 15,
+      "loss": 0.4881584942340851,
+      "accuracy": 1.0,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.08977362924556741,
+      "training_images_per_second": 11.27092870600927
+    },
+    {
+      "epoch": 16,
+      "loss": 0.4762701392173767,
+      "accuracy": 1.0,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.05770254528889542,
+      "training_images_per_second": 6.705329597322821
+    },
+    {
+      "epoch": 17,
+      "loss": 0.49760645627975464,
+      "accuracy": 1.0,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.09221372636692489,
+      "training_images_per_second": 4.589052350467155
+    },
+    {
+      "epoch": 18,
+      "loss": 0.45794519782066345,
+      "accuracy": 1.0,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.03965590003302649,
+      "training_images_per_second": 7.225237581591768
+    },
+    {
+      "epoch": 19,
+      "loss": 0.47783446311950684,
+      "accuracy": 1.0,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.04291696575511356,
+      "training_images_per_second": 6.161088814026262
+    },
+    {
+      "epoch": 20,
+      "loss": 0.4558756351470947,
+      "accuracy": 1.0,
+      "validation_accuracy": 0.4,
+      "gradient_norm": 0.027276402061312075,
+      "training_images_per_second": 8.457440635975308
+    }
+  ],
+  "confusion_matrix": [
+    [
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "classes": [
+    "bird",
+    "butterfly",
+    "elephant",
+    "swan",
+    "tiger"
+  ],
+  "target_count": 5,
+  "figures": [
+    "confusion_matrix.png",
+    "gradient_norms.png",
+    "pr_bird.png",
+    "pr_butterfly.png",
+    "pr_elephant.png",
+    "pr_swan.png",
+    "pr_tiger.png",
+    "roc_bird.png",
+    "roc_butterfly.png",
+    "roc_elephant.png",
+    "roc_swan.png",
+    "roc_tiger.png",
+    "training_curves.png"
+  ]
+}

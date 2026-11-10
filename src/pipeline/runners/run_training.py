@@ -97,6 +97,7 @@ def train_cnn(
     checkpoint_dir: Path,
     experiment: str,
     weight_decay: float = 0.05,
+    early_stop_patience: int = 5,
 ) -> list[dict]:
     model.train()
     reset_peak_gpu_memory(device)

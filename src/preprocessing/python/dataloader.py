@@ -29,7 +29,13 @@ class ManifestDataset(Dataset):
         image_size: tuple[int, int] = (224, 224),
         training: bool = False,
         allow_raw_fallback: bool = False,
+        augment: bool = True,
     ) -> None:
+        self.records = records
+        self.image_size = image_size
+        self.allow_raw_fallback = allow_raw_fallback
+        self.training = training
+        self.augment = augment
         self.records = records
         self.image_size = image_size
         self.allow_raw_fallback = allow_raw_fallback
