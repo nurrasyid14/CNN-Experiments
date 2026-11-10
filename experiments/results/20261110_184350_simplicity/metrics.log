@@ -1,0 +1,57 @@
+=====================================================
+Experiment Run ID : 20261110_184350_simplicity
+Dataset           : simplicity
+Architecture      : repvgg-a0
+Head Classifier   : mlp
+Execution Device  : cuda
+Timestamp         : 2026-11-10T18:48:34.812054
+Classes (10): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+=====================================================
+
+--- Model Architecture & Complexity ---
+Total Parameters    : 8,488,970 (trainable: 8,488,970)
+Estimated FLOPs     : 3027510784
+Peak VRAM Usage     : 3018.54 MiB
+Embedding Dimension : 512
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+           0       0.67      0.70      0.68        20
+           1       0.44      0.60      0.51        20
+           2       0.48      0.50      0.49        20
+           3       0.89      0.80      0.84        20
+           4       0.65      1.00      0.78        20
+           5       0.40      0.20      0.27        20
+           6       1.00      0.60      0.75        20
+           7       0.87      1.00      0.93        20
+           8       0.69      0.55      0.61        20
+           9       0.76      0.80      0.78        20
+
+    accuracy                           0.68       200
+   macro avg       0.68      0.67      0.66       200
+weighted avg       0.68      0.68      0.66       200
+
+
+--- Summary Evaluation ---
+Test Accuracy       : 0.6750
+Macro ROC-AUC       : 0.9453
+Macro PR-AUC        : 0.7571
+
+--- Training History ---
+Epoch 01/10: Loss=2.2105 | Train Acc=0.2760 | Val Acc=0.3867 | Grad Norm=0.1250 | Throughput=6.8 img/s
+Epoch 02/10: Loss=1.5887 | Train Acc=0.5120 | Val Acc=0.3500 | Grad Norm=0.1351 | Throughput=18.4 img/s
+Epoch 03/10: Loss=1.4739 | Train Acc=0.5720 | Val Acc=0.5133 | Grad Norm=0.0776 | Throughput=38.0 img/s
+Epoch 04/10: Loss=1.2929 | Train Acc=0.6460 | Val Acc=0.6733 | Grad Norm=0.1373 | Throughput=64.6 img/s
+Epoch 05/10: Loss=1.1771 | Train Acc=0.7220 | Val Acc=0.6500 | Grad Norm=0.1357 | Throughput=72.8 img/s
+Epoch 06/10: Loss=1.2074 | Train Acc=0.7080 | Val Acc=0.6833 | Grad Norm=0.1870 | Throughput=77.1 img/s
+Epoch 07/10: Loss=1.0432 | Train Acc=0.8040 | Val Acc=0.7433 | Grad Norm=0.0803 | Throughput=65.0 img/s
+Epoch 08/10: Loss=1.0881 | Train Acc=0.7580 | Val Acc=0.7767 | Grad Norm=0.1633 | Throughput=67.2 img/s
+Epoch 09/10: Loss=0.9673 | Train Acc=0.8140 | Val Acc=0.8200 | Grad Norm=0.1067 | Throughput=65.8 img/s
+Epoch 10/10: Loss=0.9263 | Train Acc=0.8480 | Val Acc=0.8267 | Grad Norm=0.1134 | Throughput=73.0 img/s
+
+--- Generated Artifacts ---
+Best Weights       : E:\CNN-Experiments\experiments\results\20261110_184350_simplicity\best_model.pt
+Features           : E:\CNN-Experiments\experiments\results\20261110_184350_simplicity\feats.pt
+Decoded Metrics    : E:\CNN-Experiments\experiments\results\20261110_184350_simplicity\metrics.json
+Figures Directory  : E:\CNN-Experiments\experiments\results\20261110_184350_simplicity\figures
