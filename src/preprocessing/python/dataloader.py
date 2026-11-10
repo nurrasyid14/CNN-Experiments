@@ -36,10 +36,6 @@ class ManifestDataset(Dataset):
         self.allow_raw_fallback = allow_raw_fallback
         self.training = training
         self.augment = augment
-        self.records = records
-        self.image_size = image_size
-        self.allow_raw_fallback = allow_raw_fallback
-        self.training = training
 
     def __len__(self) -> int:
         return len(self.records)
@@ -65,7 +61,7 @@ class ManifestDataset(Dataset):
                 )
             tensor = values.reshape(channels, height, width).copy()
 
-            if self.training:
+            if self.training and self.augment:
                 # 1. Random horizontal flip (50% probability)
                 if np.random.rand() > 0.5:
                     tensor = np.flip(tensor, axis=2).copy()

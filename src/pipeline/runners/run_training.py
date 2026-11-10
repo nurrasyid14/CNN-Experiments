@@ -205,6 +205,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--experiment", choices=["simplicity", "aerial", "animal", "mnist"], default="simplicity")
     parser.add_argument("--architecture", "--model", dest="architecture", default="repvgg-a0")
+    parser.add_argument("--head", choices=["mlp", "rnn", "lstm"], default="mlp")
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--image-size", type=int, default=224)
@@ -219,6 +220,8 @@ def main() -> int:
     root = ROOT
     datasets = load_config(root / "configs/datasets.yaml")["datasets"]
     training_config = load_config(root / "configs/training.yaml")["training"]
+    learning_rate = args.learning_rate if args.learning_rate is not None else float(training_config["learning_rate"])
+    weight_decay = args.weight_decay if args.weight_decay is not None else float(training_config["weight_decay"])
     seed_everything(int(training_config["seed"]))
     configure_acceleration(training_config)
 
@@ -260,13 +263,22 @@ def main() -> int:
 
     cnn_history = train_cnn(
         model,
-        make_loader(split_records["train"], batch_size, training=True, image_size=args.image_size, **loader_options),
+        make_loader(
+            split_records["train"],
+            batch_size,
+            training=True,
+            image_size=args.image_size,
+            augment=args.augment,
+            **loader_options,
+        ),
         make_loader(split_records["validation"], batch_size, training=False, image_size=args.image_size, **loader_options),
         device,
         args.epochs,
-        float(training_config["learning_rate"]),
+        learning_rate,
         checkpoint_dir,
         args.experiment,
+        weight_decay=weight_decay,
+        early_stop_patience=args.early_stop_patience,
     )
     best_checkpoint = torch.load(
         checkpoint_dir / "best_model.pt",
@@ -316,8 +328,9 @@ def main() -> int:
         validation_labels,
         device,
         args.epochs,
-        float(training_config["learning_rate"]),
+        learning_rate,
         batch_size=batch_size,
+        weight_decay=weight_decay,
     )
     monitoring_dir = root / "outputs" / "monitoring" / args.experiment / run_id
     monitoring = MonitoringLogger(monitoring_dir)

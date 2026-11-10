@@ -1,0 +1,271 @@
+{
+  "experiment": "simplicity",
+  "roc_auc_by_class": {
+    "0": 0.9213888888888888,
+    "1": 0.9191666666666667,
+    "2": 0.9038888888888889,
+    "3": 0.9972222222222222,
+    "4": 1.0,
+    "5": 0.8636111111111111,
+    "6": 0.9852777777777778,
+    "7": 0.9991666666666668,
+    "8": 0.9361111111111111,
+    "9": 0.9836111111111112
+  },
+  "pr_auc_by_class": {
+    "0": 0.8121125174704895,
+    "1": 0.6620145643378014,
+    "2": 0.7127724647793445,
+    "3": 0.980952380952381,
+    "4": 1.0,
+    "5": 0.538430574386083,
+    "6": 0.9360353535353536,
+    "7": 0.9929545454545454,
+    "8": 0.64544332699272,
+    "9": 0.9127637082571294
+  },
+  "macro_roc_auc": 0.9509444444444446,
+  "macro_pr_auc": 0.8193479436165848,
+  "cnn_history": [
+    {
+      "epoch": 1,
+      "loss": 2.0642134952545166,
+      "accuracy": 0.316,
+      "validation_accuracy": 0.2633333333333333,
+      "gradient_norm": 0.19986640380340673,
+      "training_images_per_second": 11.251757023735824
+    },
+    {
+      "epoch": 2,
+      "loss": 1.4078914785385133,
+      "accuracy": 0.574,
+      "validation_accuracy": 0.6266666666666667,
+      "gradient_norm": 0.12572931050367298,
+      "training_images_per_second": 28.833634891843122
+    },
+    {
+      "epoch": 3,
+      "loss": 1.1955802011489869,
+      "accuracy": 0.712,
+      "validation_accuracy": 0.67,
+      "gradient_norm": 0.19088454794005624,
+      "training_images_per_second": 14.668934628722312
+    },
+    {
+      "epoch": 4,
+      "loss": 1.081524642944336,
+      "accuracy": 0.76,
+      "validation_accuracy": 0.73,
+      "gradient_norm": 0.12028316396199876,
+      "training_images_per_second": 84.88557933292465
+    },
+    {
+      "epoch": 5,
+      "loss": 1.0160410056114197,
+      "accuracy": 0.816,
+      "validation_accuracy": 0.7466666666666667,
+      "gradient_norm": 0.07737398191931702,
+      "training_images_per_second": 76.6856734150637
+    },
+    {
+      "epoch": 6,
+      "loss": 0.9935530672073364,
+      "accuracy": 0.8,
+      "validation_accuracy": 0.76,
+      "gradient_norm": 0.10463644433600296,
+      "training_images_per_second": 17.63161236946605
+    },
+    {
+      "epoch": 7,
+      "loss": 0.9051519026756286,
+      "accuracy": 0.846,
+      "validation_accuracy": 0.8066666666666666,
+      "gradient_norm": 0.09584617280744992,
+      "training_images_per_second": 51.67531260118075
+    },
+    {
+      "epoch": 8,
+      "loss": 0.8305584254264832,
+      "accuracy": 0.876,
+      "validation_accuracy": 0.8466666666666667,
+      "gradient_norm": 0.09549604327739439,
+      "training_images_per_second": 67.89521888343432
+    },
+    {
+      "epoch": 9,
+      "loss": 0.8011672911643982,
+      "accuracy": 0.906,
+      "validation_accuracy": 0.82,
+      "gradient_norm": 0.07108923221156667,
+      "training_images_per_second": 65.3562648426132
+    },
+    {
+      "epoch": 10,
+      "loss": 0.7649019470214844,
+      "accuracy": 0.906,
+      "validation_accuracy": 0.85,
+      "gradient_norm": 0.19045339827425778,
+      "training_images_per_second": 84.49613677867434
+    }
+  ],
+  "confusion_matrix": [
+    [
+      15,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0
+    ],
+    [
+      1,
+      15,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      3,
+      15,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      1,
+      17,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      5,
+      0,
+      0,
+      2,
+      6,
+      0,
+      0,
+      7,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      17,
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      19,
+      0,
+      0
+    ],
+    [
+      0,
+      7,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      11,
+      0
+    ],
+    [
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      16
+    ]
+  ],
+  "classes": [
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9"
+  ],
+  "target_count": 200,
+  "figures": [
+    "confusion_matrix.png",
+    "gradient_norms.png",
+    "pr_0.png",
+    "pr_1.png",
+    "pr_2.png",
+    "pr_3.png",
+    "pr_4.png",
+    "pr_5.png",
+    "pr_6.png",
+    "pr_7.png",
+    "pr_8.png",
+    "pr_9.png",
+    "roc_0.png",
+    "roc_1.png",
+    "roc_2.png",
+    "roc_3.png",
+    "roc_4.png",
+    "roc_5.png",
+    "roc_6.png",
+    "roc_7.png",
+    "roc_8.png",
+    "roc_9.png",
+    "training_curves.png"
+  ]
+}

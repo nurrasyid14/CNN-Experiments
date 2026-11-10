@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [ValidateRange(1, 1000)]
-    [int]$Epochs = 10,
+    [int]$Epochs = 22,
 
     [ValidateRange(1, 4096)]
     [int]$BatchSize = 32,

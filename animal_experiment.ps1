@@ -101,8 +101,7 @@ Invoke-PythonCommand -ArgumentList @(
     "--run-id", $runId,
     "--early-stop-patience", "3",
     "--learning-rate", "5e-4",
-    "--weight-decay", "0.1",
-    "--augment", $false
+    "--weight-decay", "0.1"
 )
 
 # 4. Verification and artifact channeling
