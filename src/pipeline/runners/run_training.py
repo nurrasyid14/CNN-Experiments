@@ -65,11 +65,13 @@ def make_loader(
     image_size: int = 224,
     num_workers: int = 0,
     persistent_workers: bool = False,
+    augment: bool = True,
 ) -> DataLoader:
     dataset = ManifestDataset(
         records,
         image_size=(image_size, image_size),
         training=training,
+        augment=augment,
     )
     return DataLoader(
         dataset,
@@ -209,6 +211,8 @@ def main() -> int:
     parser.add_argument("--embedding-dim", type=int, default=1280)
     parser.add_argument("--head", choices=["mlp", "lstm", "rnn"], default="mlp")
     parser.add_argument("--run-id", type=str, default=None, help="Custom ID; defaults to <YYYYMMDD_HHMMSS>_<dataset>")
+    parser.add_argument("--early-stop-patience", type=int, default=5, help="Patience for early stopping (epochs without improvement)")
+    parser.add_argument("--augment", action="store_true", default=False, help="Enable data augmentation (default off for tiny datasets)")
     args = parser.parse_args()
 
     root = ROOT

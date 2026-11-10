@@ -9,5 +9,5 @@ class RepVGGA0Config:
     embedding_dim: int = 1280
     in_channels: int = 3
     deploy: bool = False
-    dropout: float = 0.3
+    dropout: float = 0.4
 

@@ -98,7 +98,11 @@ Invoke-PythonCommand -ArgumentList @(
     "--batch-size", "$BatchSize",
     "--image-size", "$ImageSize",
     "--embedding-dim", "$EmbeddingDim",
-    "--run-id", $runId
+    "--run-id", $runId,
+    "--early-stop-patience", "3",
+    "--learning-rate", "5e-4",
+    "--weight-decay", "0.1",
+    "--augment", $false
 )
 
 # 4. Verification and artifact channeling
@@ -127,4 +131,3 @@ if (Test-Path $figuresDir) {
     }
 }
 Write-Host "============================================================" -ForegroundColor Green
-

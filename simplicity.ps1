@@ -142,4 +142,3 @@ if (Test-Path $figuresDir) {
     }
 }
 Write-Host "============================================================" -ForegroundColor Green
-
