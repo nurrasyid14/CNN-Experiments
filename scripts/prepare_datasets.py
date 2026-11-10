@@ -4,6 +4,7 @@ import argparse
 import csv
 import json
 import random
+import re
 from collections import Counter
 from pathlib import Path
 
@@ -27,6 +28,32 @@ def write_jsonl(path: Path, records: list[dict]) -> None:
             output.write(json.dumps(record, sort_keys=True) + "\n")
 
 
+def export_binary_tensor(image_path: Path, processed_dir: Path, image_size: int = 224) -> str:
+    """Generate normalized C++ tensor in CNNTNS1 format."""
+    processed_dir.mkdir(parents=True, exist_ok=True)
+    name_hash = abs(hash(image_path.name))
+    tensor_name = f"{name_hash}.bin"
+    tensor_path = processed_dir / tensor_name
+    if tensor_path.is_file() and tensor_path.stat().st_size > 0:
+        return str(tensor_path.resolve())
+
+    with Image.open(image_path) as img:
+        img = img.convert("RGB").resize((image_size, image_size), Image.Resampling.BILINEAR)
+        arr = np.asarray(img, dtype=np.float32) / 255.0
+    mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+    std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+    norm = (arr - mean) / std
+    chw = np.ascontiguousarray(norm.transpose(2, 0, 1), dtype=np.float32)
+
+    magic = b"CNNTNS1\0"
+    dims = np.array([3, image_size, image_size], dtype="<u4")
+    with tensor_path.open("wb") as out:
+        out.write(magic)
+        out.write(dims.tobytes())
+        out.write(chw.tobytes())
+    return str(tensor_path.resolve())
+
+
 def load_classes(path: Path) -> tuple[list[str], dict[tuple[int, int, int], str]]:
     with path.open("r", newline="", encoding="utf-8-sig") as source:
         rows = csv.DictReader(source)
@@ -39,9 +66,10 @@ def load_classes(path: Path) -> tuple[list[str], dict[tuple[int, int, int], str]
     return names, colors
 
 
-def prepare_simplicity(root: Path, config: dict) -> tuple[list[dict], Counter]:
+def prepare_simplicity(root: Path, config: dict, image_size: int = 224) -> tuple[list[dict], Counter]:
     raw_dir = resolve(root, config["raw_dir"])
     divisor = int(config["label_divisor"])
+    processed_dir = resolve(root, f"data/processed/simplicity")
     records = []
     counts = Counter()
 
@@ -53,18 +81,25 @@ def prepare_simplicity(root: Path, config: dict) -> tuple[list[dict], Counter]:
             if image_path.suffix.lower() not in IMAGE_SUFFIXES:
                 continue
             label = int(image_path.stem) // divisor
-            records.append({"path": str(image_path.resolve()), "label": label, "split": split})
+            tensor_path = export_binary_tensor(image_path, processed_dir, image_size)
+            records.append({
+                "path": str(image_path.resolve()),
+                "label": label,
+                "split": split,
+                "tensor_path": tensor_path,
+            })
             counts[f"{split}/class_{label}"] += 1
 
     write_jsonl(resolve(root, config["manifest"]), records)
     return records, counts
 
 
-def prepare_aerial(root: Path, config: dict) -> tuple[list[dict], Counter]:
+def prepare_aerial(root: Path, config: dict, image_size: int = 224) -> tuple[list[dict], Counter]:
     raw_dir = resolve(root, config["raw_dir"])
     images_dir = raw_dir / config["images_dir"]
     masks_dir = raw_dir / config["masks_dir"]
     class_names, colors = load_classes(resolve(root, config["class_csv"]))
+    processed_dir = resolve(root, f"data/processed/aerial")
     counts = Counter()
     samples = []
 
@@ -118,33 +153,56 @@ def prepare_aerial(root: Path, config: dict) -> tuple[list[dict], Counter]:
                 else "validation" if index < train_count + validation_count
                 else "test"
             )
+            tensor_path = export_binary_tensor(Path(image_path), processed_dir, image_size)
             records.append({
                 "path": image_path,
                 "mask_path": mask_path,
                 "label": label,
                 "split": split,
+                "tensor_path": tensor_path,
             })
 
     write_jsonl(resolve(root, config["manifest"]), records)
     return records, counts
 
 
-def prepare_animal(root: Path, config: dict) -> tuple[list[dict], Counter]:
+def prepare_animal(root: Path, config: dict, image_size: int = 224) -> tuple[list[dict], Counter]:
     raw_dir = resolve(root, config["raw_dir"])
+    if not raw_dir.is_dir() and "raw_dir_fallback" in config:
+        fallback = resolve(root, config["raw_dir_fallback"])
+        if fallback.is_dir():
+            raw_dir = fallback
+
     range_size = int(config["range_size"])
     class_names = config["class_names"]
+    processed_dir = resolve(root, "data/processed/animal")
     samples = []
 
-    for image_path in sorted(raw_dir.iterdir(), key=lambda path: int(path.stem[4:])):
-        if image_path.suffix.lower() not in IMAGE_SUFFIXES:
+    # Collect images either directly or recursively, deduplicating by stem name
+    candidate_paths = (
+        list(raw_dir.iterdir()) if any(f.is_file() for f in raw_dir.iterdir())
+        else list(raw_dir.rglob("*"))
+    )
+    seen_stems = set()
+
+    for image_path in sorted(candidate_paths):
+        if not image_path.is_file() or image_path.suffix.lower() not in IMAGE_SUFFIXES:
             continue
-        numeric_suffix = image_path.stem[4:]
-        if not numeric_suffix.isdigit():
-            raise ValueError(f"Expected a numeric animal image name: {image_path}")
+        if image_path.stem in seen_stems:
+            continue
+        # Extract digits from stem (e.g., data12 -> 12, 12 -> 12)
+        digits = re.findall(r"\d+", image_path.stem)
+        if not digits:
+            continue
+        numeric_suffix = digits[-1]
         class_index = int(numeric_suffix) // range_size
         if class_index >= len(class_names):
-            raise ValueError(f"No class configured for {image_path.name}")
+            continue
+        seen_stems.add(image_path.stem)
         samples.append((str(image_path.resolve()), class_names[class_index]))
+
+    if not samples:
+        raise FileNotFoundError(f"No animal images found in {raw_dir}")
 
     split_config = config["split"]
     rng = random.Random(int(split_config["seed"]))
@@ -164,15 +222,22 @@ def prepare_animal(root: Path, config: dict) -> tuple[list[dict], Counter]:
                 else "validation" if index < train_count + validation_count
                 else "test"
             )
-            records.append({"path": image_path, "label": label, "split": split})
+            tensor_path = export_binary_tensor(Path(image_path), processed_dir, image_size)
+            records.append({
+                "path": image_path,
+                "label": label,
+                "split": split,
+                "tensor_path": tensor_path,
+            })
             counts[f"{split}/{label}"] += 1
 
     write_jsonl(resolve(root, config["manifest"]), records)
     return records, counts
 
 
-def prepare_mnist(root: Path, config: dict) -> tuple[list[dict], Counter]:
+def prepare_mnist(root: Path, config: dict, image_size: int = 28) -> tuple[list[dict], Counter]:
     raw_dir = resolve(root, config["raw_dir"])
+    processed_dir = resolve(root, "data/processed/mnist")
     samples = []
     counts = Counter()
 
@@ -181,9 +246,9 @@ def prepare_mnist(root: Path, config: dict) -> tuple[list[dict], Counter]:
             continue
         label, separator, _ = image_path.stem.partition("_")
         if not separator or not label.isdigit():
-            raise ValueError(f"Expected a labeled MNIST image name: {image_path.name}")
+            continue
         if label not in config["class_names"]:
-            raise ValueError(f"No class configured for {image_path.name}")
+            continue
         samples.append((str(image_path.resolve()), label))
 
     if not samples:
@@ -206,7 +271,13 @@ def prepare_mnist(root: Path, config: dict) -> tuple[list[dict], Counter]:
                 else "validation" if index < train_count + validation_count
                 else "test"
             )
-            records.append({"path": image_path, "label": label, "split": split})
+            tensor_path = export_binary_tensor(Path(image_path), processed_dir, image_size)
+            records.append({
+                "path": image_path,
+                "label": label,
+                "split": split,
+                "tensor_path": tensor_path,
+            })
             counts[f"{split}/{label}"] += 1
 
     write_jsonl(resolve(root, config["manifest"]), records)
@@ -217,6 +288,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/datasets.yaml")
     parser.add_argument("--experiment", choices=["simplicity", "aerial", "animal", "mnist", "all"], default="all")
+    parser.add_argument("--image-size", type=int, default=224)
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[1]
@@ -232,8 +304,8 @@ def main() -> int:
             "animal": prepare_animal,
             "mnist": prepare_mnist,
         }[name]
-        records, counts = prepare(root, datasets[name])
-        print(f"{name}: {len(records)} images")
+        records, counts = prepare(root, datasets[name], image_size=args.image_size)
+        print(f"{name}: {len(records)} images prepared with C++ tensors")
         for label, count in sorted(counts.items()):
             print(f"  {label}: {count}")
     return 0

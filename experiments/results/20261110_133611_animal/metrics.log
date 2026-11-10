@@ -1,0 +1,62 @@
+=====================================================
+Experiment Run ID : 20261110_133611_animal
+Dataset           : animal
+Architecture      : repvgg-a0
+Head Classifier   : mlp
+Execution Device  : cuda
+Timestamp         : 2026-11-10T13:38:03.402706
+Classes (5): bird, butterfly, elephant, swan, tiger
+=====================================================
+
+--- Model Architecture & Complexity ---
+Total Parameters    : 8,486,405 (trainable: 8,486,405)
+Estimated FLOPs     : 3027505664
+Peak VRAM Usage     : 2611.79 MiB
+Embedding Dimension : 512
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+        bird       0.00      0.00      0.00         1
+   butterfly       0.00      0.00      0.00         1
+    elephant       0.00      0.00      0.00         1
+        swan       0.50      1.00      0.67         1
+       tiger       0.50      1.00      0.67         1
+
+    accuracy                           0.40         5
+   macro avg       0.20      0.40      0.27         5
+weighted avg       0.20      0.40      0.27         5
+
+
+--- Summary Evaluation ---
+Test Accuracy       : 0.4000
+Macro ROC-AUC       : 0.8000
+Macro PR-AUC        : 0.7333
+
+--- Training History ---
+Epoch 01/20: Loss=1.6262 | Train Acc=0.2667 | Val Acc=0.2000 | Grad Norm=0.2891 | Throughput=0.9 img/s
+Epoch 02/20: Loss=2.6926 | Train Acc=0.2667 | Val Acc=0.2000 | Grad Norm=0.8667 | Throughput=36.3 img/s
+Epoch 03/20: Loss=1.1414 | Train Acc=0.5333 | Val Acc=0.2000 | Grad Norm=0.1762 | Throughput=33.3 img/s
+Epoch 04/20: Loss=1.4261 | Train Acc=0.3333 | Val Acc=0.4000 | Grad Norm=0.2652 | Throughput=36.2 img/s
+Epoch 05/20: Loss=0.8644 | Train Acc=0.7333 | Val Acc=0.4000 | Grad Norm=0.0630 | Throughput=41.9 img/s
+Epoch 06/20: Loss=0.7171 | Train Acc=0.9333 | Val Acc=0.4000 | Grad Norm=0.0593 | Throughput=32.5 img/s
+Epoch 07/20: Loss=0.5396 | Train Acc=0.9333 | Val Acc=0.4000 | Grad Norm=0.0934 | Throughput=32.6 img/s
+Epoch 08/20: Loss=0.2876 | Train Acc=1.0000 | Val Acc=0.4000 | Grad Norm=0.0717 | Throughput=38.6 img/s
+Epoch 09/20: Loss=0.1075 | Train Acc=1.0000 | Val Acc=0.4000 | Grad Norm=0.0475 | Throughput=36.0 img/s
+Epoch 10/20: Loss=0.0314 | Train Acc=1.0000 | Val Acc=0.4000 | Grad Norm=0.0180 | Throughput=39.6 img/s
+Epoch 11/20: Loss=0.0100 | Train Acc=1.0000 | Val Acc=0.6000 | Grad Norm=0.0076 | Throughput=15.0 img/s
+Epoch 12/20: Loss=0.0044 | Train Acc=1.0000 | Val Acc=0.6000 | Grad Norm=0.0040 | Throughput=8.3 img/s
+Epoch 13/20: Loss=0.0039 | Train Acc=1.0000 | Val Acc=0.4000 | Grad Norm=0.0069 | Throughput=7.4 img/s
+Epoch 14/20: Loss=0.0035 | Train Acc=1.0000 | Val Acc=0.4000 | Grad Norm=0.0062 | Throughput=17.7 img/s
+Epoch 15/20: Loss=0.0031 | Train Acc=1.0000 | Val Acc=0.4000 | Grad Norm=0.0055 | Throughput=25.6 img/s
+Epoch 16/20: Loss=0.0025 | Train Acc=1.0000 | Val Acc=0.6000 | Grad Norm=0.0055 | Throughput=29.5 img/s
+Epoch 17/20: Loss=0.0015 | Train Acc=1.0000 | Val Acc=0.6000 | Grad Norm=0.0028 | Throughput=9.0 img/s
+Epoch 18/20: Loss=0.0010 | Train Acc=1.0000 | Val Acc=0.6000 | Grad Norm=0.0024 | Throughput=6.0 img/s
+Epoch 19/20: Loss=0.0007 | Train Acc=1.0000 | Val Acc=0.6000 | Grad Norm=0.0020 | Throughput=9.1 img/s
+Epoch 20/20: Loss=0.0005 | Train Acc=1.0000 | Val Acc=0.6000 | Grad Norm=0.0014 | Throughput=10.5 img/s
+
+--- Generated Artifacts ---
+Best Weights       : E:\CNN-Experiments\experiments\results\20261110_133611_animal\best_model.pt
+Features           : E:\CNN-Experiments\experiments\results\20261110_133611_animal\feats.pt
+Decoded Metrics    : E:\CNN-Experiments\experiments\results\20261110_133611_animal\metrics.json
+Figures Directory  : E:\CNN-Experiments\experiments\results\20261110_133611_animal\figures

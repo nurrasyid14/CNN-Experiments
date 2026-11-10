@@ -12,7 +12,7 @@ class CNNMLPHead(nn.Module):
         input_dim: int,
         num_classes: int,
         hidden_dims: tuple[int, ...] = (256, 128),
-        dropout: float = 0.1,
+        dropout: float = 0.3,
     ) -> None:
         super().__init__()
         layers: list[nn.Module] = []

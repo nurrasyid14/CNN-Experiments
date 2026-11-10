@@ -33,6 +33,7 @@ class ManifestDataset(Dataset):
         self.records = records
         self.image_size = image_size
         self.allow_raw_fallback = allow_raw_fallback
+        self.training = training
 
     def __len__(self) -> int:
         return len(self.records)
@@ -57,6 +58,26 @@ class ManifestDataset(Dataset):
                     f"x {self.image_size[1]}"
                 )
             tensor = values.reshape(channels, height, width).copy()
+
+            if self.training:
+                # 1. Random horizontal flip (50% probability)
+                if np.random.rand() > 0.5:
+                    tensor = np.flip(tensor, axis=2).copy()
+                # 2. Random spatial shift (+/- 8 pixels)
+                dy = int(np.random.randint(-8, 9))
+                dx = int(np.random.randint(-8, 9))
+                tensor = np.roll(tensor, shift=(dy, dx), axis=(1, 2)).copy()
+                # 3. Subtle contrast / brightness variation (0.9 to 1.1)
+                factor = float(np.random.uniform(0.9, 1.1))
+                tensor = tensor * factor
+                # 4. Random cutout (33% probability): mask a small 24x24 patch
+                if np.random.rand() < 0.33:
+                    h, w = self.image_size
+                    ph, pw = max(16, int(h * 0.12)), max(16, int(w * 0.12))
+                    y0 = int(np.random.randint(0, h - ph))
+                    x0 = int(np.random.randint(0, w - pw))
+                    tensor[:, y0:y0 + ph, x0:x0 + pw] = 0.0
+
             return tensor.astype(np.float32, copy=False), int(record["label_index"])
         raise ValueError(
             f"Record has no C++ tensor_path: {record.get('path', '<unknown>')}"

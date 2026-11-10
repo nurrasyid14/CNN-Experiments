@@ -16,10 +16,11 @@ def train_embedding_head(
     epochs: int,
     learning_rate: float = 0.001,
     batch_size: int = 32,
+    weight_decay: float = 0.05,
 ) -> list[dict]:
     model = model.to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
-    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
     train_loader = DataLoader(
         TensorDataset(
             torch.from_numpy(features.astype(np.float32, copy=False)),

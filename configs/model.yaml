@@ -1,8 +1,18 @@
 model:
+  architecture: repvgg-a0
   input_channels: 3
   input_height: 224
   input_width: 224
-  num_classes: auto            # resolved from class_mapping.json
+  embedding_dim: 1280
+  num_classes: auto            # resolved dynamically from dataset classes
+
+  repvgg_a0:
+    variant: A0
+    multipliers:
+      a: 0.75
+      b: 2.5
+    num_blocks: [1, 2, 4, 14, 1]
+    channels: [48, 48, 96, 192, 1280]
 
   convolution:
     kernel_size: 3

@@ -24,11 +24,16 @@ std::optional<std::string> resolve_label(const fs::path& file, const fs::path& r
 
         case LabelMode::NumericStem: {
             const std::string stem = to_utf8(file.stem());
-            const bool digits = !stem.empty() && stem.size() <= 9 &&
-                                std::all_of(stem.begin(), stem.end(),
+            std::size_t start = 0;
+            while (start < stem.size() && !std::isdigit(static_cast<unsigned char>(stem[start]))) {
+                ++start;
+            }
+            const std::string num_str = stem.substr(start);
+            const bool digits = !num_str.empty() && num_str.size() <= 9 &&
+                                std::all_of(num_str.begin(), num_str.end(),
                                             [](unsigned char c) { return std::isdigit(c) != 0; });
             if (!digits || rule.divisor <= 0) return std::nullopt;
-            return std::to_string(std::stoi(stem) / rule.divisor);
+            return std::to_string(std::stoi(num_str) / rule.divisor);
         }
 
         case LabelMode::PrefixStem: {

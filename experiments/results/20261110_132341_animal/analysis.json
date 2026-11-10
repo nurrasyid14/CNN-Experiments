@@ -1,0 +1,105 @@
+{
+  "experiment": "animal",
+  "roc_auc_by_class": {
+    "bird": 0.25,
+    "butterfly": 1.0,
+    "elephant": 0.5,
+    "swan": 0.75,
+    "tiger": 0.25
+  },
+  "pr_auc_by_class": {
+    "bird": 0.25,
+    "butterfly": 1.0,
+    "elephant": 0.3333333333333333,
+    "swan": 0.5,
+    "tiger": 0.25
+  },
+  "macro_roc_auc": 0.55,
+  "macro_pr_auc": 0.4666666666666666,
+  "cnn_history": [
+    {
+      "epoch": 1,
+      "loss": 2.308202107747396,
+      "accuracy": 0.06666666666666667,
+      "validation_accuracy": 0.2,
+      "gradient_norm": 0.9526154644388173,
+      "training_images_per_second": 0.44812777057299424
+    },
+    {
+      "epoch": 2,
+      "loss": 1.334215807914734,
+      "accuracy": 0.3333333333333333,
+      "validation_accuracy": 0.2,
+      "gradient_norm": 0.32109319964157684,
+      "training_images_per_second": 32.35475304402991
+    },
+    {
+      "epoch": 3,
+      "loss": 1.0416738986968994,
+      "accuracy": 0.4,
+      "validation_accuracy": 0.2,
+      "gradient_norm": 0.3434556786891162,
+      "training_images_per_second": 27.12266005778024
+    }
+  ],
+  "confusion_matrix": [
+    [
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  ],
+  "classes": [
+    "bird",
+    "butterfly",
+    "elephant",
+    "swan",
+    "tiger"
+  ],
+  "target_count": 5,
+  "figures": [
+    "confusion_matrix.png",
+    "gradient_norms.png",
+    "pr_bird.png",
+    "pr_butterfly.png",
+    "pr_elephant.png",
+    "pr_swan.png",
+    "pr_tiger.png",
+    "roc_bird.png",
+    "roc_butterfly.png",
+    "roc_elephant.png",
+    "roc_swan.png",
+    "roc_tiger.png",
+    "training_curves.png"
+  ]
+}

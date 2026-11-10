@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
+import shutil
 import sys
 from datetime import datetime
 from time import perf_counter
@@ -16,10 +18,12 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 ROOT = Path(__file__).resolve().parents[3]
+os.environ.setdefault("MPLCONFIGDIR", str(ROOT / "build" / "matplotlib"))
 SRC_ROOT = ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
+from convolution.models.architectures import build_model
 from convolution.models.cnn.classifier import CNNFeatureExtractor
 from learning.checkpoints.manager import save_torch_artifact
 from learning.evaluation.evaluator import analyze_experiment
@@ -84,7 +88,7 @@ def configure_acceleration(training_config: dict) -> None:
 
 
 def train_cnn(
-    model: CNNFeatureExtractor,
+    model: nn.Module,
     loader: DataLoader,
     validation_loader: DataLoader,
     device: torch.device,
@@ -92,11 +96,13 @@ def train_cnn(
     learning_rate: float,
     checkpoint_dir: Path,
     experiment: str,
+    weight_decay: float = 0.05,
 ) -> list[dict]:
     model.train()
     reset_peak_gpu_memory(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
-    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max(epochs, 1), eta_min=1e-5)
     best_accuracy = -1.0
     history = []
     for epoch in range(epochs):
@@ -115,6 +121,7 @@ def train_cnn(
             total_loss += loss.item() * labels.size(0)
             correct += (logits.argmax(1) == labels).sum().item()
             total += labels.size(0)
+        scheduler.step()
         print(
             f"epoch={epoch + 1}/{epochs} "
             f"loss={total_loss / max(total, 1):.4f} "
@@ -132,6 +139,7 @@ def train_cnn(
                 "model_state_dict": model.state_dict(),
                 "optimizer_state_dict": optimizer.state_dict(),
                 "experiment": experiment,
+                "architecture": getattr(model, "__class__", type(model)).__name__,
             },
             checkpoint_dir / "latest_model.pt",
         )
@@ -167,6 +175,7 @@ def train_cnn(
                     "optimizer_state_dict": optimizer.state_dict(),
                     "validation_accuracy": validation_accuracy,
                     "experiment": experiment,
+                    "architecture": getattr(model, "__class__", type(model)).__name__,
                 },
                 checkpoint_dir / "best_model.pt",
             )
@@ -174,7 +183,7 @@ def train_cnn(
 
 
 def extract_features(
-    model: CNNFeatureExtractor,
+    model: nn.Module,
     loader: DataLoader,
     device: torch.device,
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -192,11 +201,13 @@ def extract_features(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--experiment", choices=["simplicity", "aerial", "animal", "mnist"], default="simplicity")
+    parser.add_argument("--architecture", "--model", dest="architecture", default="repvgg-a0")
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--image-size", type=int, default=224)
-    parser.add_argument("--embedding-dim", type=int, default=512)
+    parser.add_argument("--embedding-dim", type=int, default=1280)
     parser.add_argument("--head", choices=["mlp", "lstm", "rnn"], default="mlp")
+    parser.add_argument("--run-id", type=str, default=None, help="Custom ID; defaults to <YYYYMMDD_HHMMSS>_<dataset>")
     args = parser.parse_args()
 
     root = ROOT
@@ -222,10 +233,25 @@ def main() -> int:
         "num_workers": int(dataloader_config["num_workers"]),
         "persistent_workers": bool(dataloader_config["persistent_workers"]),
     }
-    run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
-    model = CNNFeatureExtractor(args.embedding_dim, len(class_names)).to(device)
+
+    # Each experiment run is labelled with datetime followed with dataset name as its ID
+    run_id = args.run_id if args.run_id else f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{args.experiment}"
+    print(f"=== Starting Experiment: {run_id} (Architecture: {args.architecture}, Device: {device}) ===")
+
+    model = build_model(
+        args.architecture,
+        num_classes=len(class_names),
+        embedding_dim=args.embedding_dim,
+    ).to(device)
+
+    # Directories for checkpoints and outputs
     checkpoint_dir = root / "outputs" / "checkpoints" / args.experiment / run_id
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    experiment_dir = root / "experiments" / "results" / run_id
+    experiment_dir.mkdir(parents=True, exist_ok=True)
+    report_output_dir = root / "outputs" / "reports" / args.experiment / run_id
+    report_output_dir.mkdir(parents=True, exist_ok=True)
+
     cnn_history = train_cnn(
         model,
         make_loader(split_records["train"], batch_size, training=True, image_size=args.image_size, **loader_options),
@@ -306,6 +332,8 @@ def main() -> int:
     )
     metrics = {
         "experiment": args.experiment,
+        "run_id": run_id,
+        "architecture": args.architecture,
         "accuracy": float(accuracy_score(test_labels, predictions)),
         "classes": class_names,
         "device": str(device),
@@ -317,6 +345,7 @@ def main() -> int:
             class_names,
         ),
         "model": {
+            "architecture": args.architecture,
             "parameters": count_model_parameters(model),
             "flops_per_inference": estimate_model_flops(
                 model,
@@ -338,24 +367,40 @@ def main() -> int:
                 {
                     "epoch": entry["epoch"],
                     "images_per_second": entry["training_images_per_second"],
+                    "loss": entry["loss"],
+                    "accuracy": entry["accuracy"],
+                    "validation_accuracy": entry["validation_accuracy"],
                 }
                 for entry in cnn_history
             ],
             "peak_vram_mib": peak_gpu_memory_mib(device),
         },
     }
-    output_dir = root / "outputs" / "reports" / args.experiment / run_id
-    output_dir.mkdir(parents=True, exist_ok=True)
-    with (output_dir / "metrics.json").open("w", encoding="utf-8") as target:
-        json.dump(metrics, target, indent=2)
-    torch.save(
-        {
-            "model_state_dict": model.state_dict(),
-            "class_names": class_names,
-            "embedding_dim": args.embedding_dim,
-        },
-        output_dir / "cnn_features.pt",
-    )
+
+    # Features bundle
+    features_payload = {
+        "model_state_dict": model.state_dict(),
+        "class_names": class_names,
+        "embedding_dim": args.embedding_dim,
+        "train_features": train_features,
+        "train_labels": train_labels,
+        "test_features": test_features,
+        "test_labels": test_labels,
+        "validation_features": validation_features,
+        "validation_labels": validation_labels,
+    }
+
+    # Save outputs into both experiments/results/<run_id> and outputs/reports/<experiment>/<run_id>
+    for target_dir in (experiment_dir, report_output_dir):
+        # 1. Best model pt file
+        shutil.copy2(checkpoint_dir / "best_model.pt", target_dir / "best_model.pt")
+        if (checkpoint_dir / "latest_model.pt").is_file():
+            shutil.copy2(checkpoint_dir / "latest_model.pt", target_dir / "latest_model.pt")
+
+        # 2. Features pt file (both feats.pt and cnn_features.pt)
+        torch.save(features_payload, target_dir / "feats.pt")
+        torch.save(features_payload, target_dir / "cnn_features.pt")
+
     save_torch_artifact(
         checkpoint_dir,
         f"best_{args.head}",
@@ -367,8 +412,10 @@ def main() -> int:
         },
         {"experiment": args.experiment, "run_id": run_id, "head": args.head},
     )
+
+    # 3. Generate figures
     analysis = analyze_experiment(
-        output_dir,
+        experiment_dir,
         args.experiment,
         class_names,
         test_labels,
@@ -376,23 +423,91 @@ def main() -> int:
         probabilities,
         cnn_history,
     )
-    metrics["roc_auc"] = analysis["macro_roc_auc"]
-    metrics["pr_auc"] = analysis["macro_pr_auc"]
-    with (output_dir / "metrics.json").open("w", encoding="utf-8") as target:
-        json.dump(metrics, target, indent=2)
+    # Mirror figures to report_output_dir as well
+    if (experiment_dir / "figures").is_dir():
+        shutil.copytree(experiment_dir / "figures", report_output_dir / "figures", dirs_exist_ok=True)
+
+    metrics["roc_auc"] = analysis.get("macro_roc_auc")
+    metrics["pr_auc"] = analysis.get("macro_pr_auc")
+
+    # 4. Decode metrics into json and log
+    for target_dir in (experiment_dir, report_output_dir):
+        with (target_dir / "metrics.json").open("w", encoding="utf-8") as target:
+            json.dump(metrics, target, indent=2)
+
+        # Write human-readable metrics.log
+        with (target_dir / "metrics.log").open("w", encoding="utf-8") as log_file:
+            log_file.write(f"=====================================================\n")
+            log_file.write(f"Experiment Run ID : {run_id}\n")
+            log_file.write(f"Dataset           : {args.experiment}\n")
+            log_file.write(f"Architecture      : {args.architecture}\n")
+            log_file.write(f"Head Classifier   : {args.head}\n")
+            log_file.write(f"Execution Device  : {device}\n")
+            log_file.write(f"Timestamp         : {datetime.now().isoformat()}\n")
+            log_file.write(f"Classes ({len(class_names)}): {', '.join(class_names)}\n")
+            log_file.write(f"=====================================================\n\n")
+
+            log_file.write("--- Model Architecture & Complexity ---\n")
+            params_info = metrics['model']['parameters']
+            if isinstance(params_info, dict):
+                total_params = params_info.get("total", 0)
+                trainable_params = params_info.get("trainable", 0)
+                param_str = f"{total_params:,} (trainable: {trainable_params:,})"
+            else:
+                param_str = f"{params_info:,}"
+            log_file.write(f"Total Parameters    : {param_str}\n")
+            log_file.write(f"Estimated FLOPs     : {metrics['model']['flops_per_inference']}\n")
+            log_file.write(f"Peak VRAM Usage     : {metrics['model']['peak_vram_mib']:.2f} MiB\n")
+            log_file.write(f"Embedding Dimension : {args.embedding_dim}\n\n")
+
+            log_file.write("--- Classification Report ---\n")
+            log_file.write(f"{report}\n\n")
+
+            log_file.write("--- Summary Evaluation ---\n")
+            log_file.write(f"Test Accuracy       : {metrics['accuracy']:.4f}\n")
+            if metrics.get("roc_auc") is not None:
+                log_file.write(f"Macro ROC-AUC       : {metrics['roc_auc']:.4f}\n")
+            if metrics.get("pr_auc") is not None:
+                log_file.write(f"Macro PR-AUC        : {metrics['pr_auc']:.4f}\n")
+            log_file.write("\n--- Training History ---\n")
+            for entry in cnn_history:
+                log_file.write(
+                    f"Epoch {entry['epoch']:02d}/{args.epochs}: "
+                    f"Loss={entry['loss']:.4f} | "
+                    f"Train Acc={entry['accuracy']:.4f} | "
+                    f"Val Acc={entry['validation_accuracy']:.4f} | "
+                    f"Grad Norm={entry['gradient_norm']:.4f} | "
+                    f"Throughput={entry['training_images_per_second']:.1f} img/s\n"
+                )
+            log_file.write("\n--- Generated Artifacts ---\n")
+            log_file.write(f"Best Weights       : {target_dir / 'best_model.pt'}\n")
+            log_file.write(f"Features           : {target_dir / 'feats.pt'}\n")
+            log_file.write(f"Decoded Metrics    : {target_dir / 'metrics.json'}\n")
+            log_file.write(f"Figures Directory  : {target_dir / 'figures'}\n")
+
     write_run_manifest(
-        output_dir,
+        report_output_dir,
         args.experiment,
         run_id,
         {
             "head": args.head,
+            "architecture": args.architecture,
             "metrics": metrics,
             "monitoring_dir": str(monitoring_dir.relative_to(root)),
         },
     )
+
+    print("\n" + "=" * 50)
+    print(f"EXPERIMENT COMPLETE: {run_id}")
+    print("=" * 50)
     print(report)
-    print(f"test accuracy: {metrics['accuracy']:.4f}")
-    print(f"results: {output_dir}")
+    print(f"Test Accuracy: {metrics['accuracy']:.4f}")
+    print(f"Best model pt : {experiment_dir / 'best_model.pt'}")
+    print(f"Features pt   : {experiment_dir / 'feats.pt'}")
+    print(f"Metrics json  : {experiment_dir / 'metrics.json'}")
+    print(f"Metrics log   : {experiment_dir / 'metrics.log'}")
+    print(f"Figures dir   : {experiment_dir / 'figures'}")
+    print("=" * 50)
     return 0
 
 

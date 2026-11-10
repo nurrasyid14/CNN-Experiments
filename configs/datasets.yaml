@@ -24,10 +24,11 @@ datasets:
   animal:
     type: classification
     raw_dir: data/raw/animal_dataset
+    raw_dir_fallback: data/raw/animal
     manifest: data/manifests/animal.jsonl
     labels: numeric-range
     range_size: 5
-    class_names: [parrot, butterfly, elephant, swan, tiger]
+    class_names: [bird, butterfly, elephant, swan, tiger]
     split:
       train: 0.60
       validation: 0.20
